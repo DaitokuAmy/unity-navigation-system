@@ -3,6 +3,7 @@ using System.Collections;
 namespace UnityNavigationSystem {
     /// <summary>
     /// Screen単位のNavNodeインターフェース
+    /// ※Session or Screen直下にのみ置けるNode
     /// </summary>
     public interface IScreenNode : INavNode {
         /// <summary>

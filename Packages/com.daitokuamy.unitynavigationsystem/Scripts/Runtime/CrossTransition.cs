@@ -17,18 +17,18 @@ namespace UnityNavigationSystem {
             resolver.DeactivatePrev();
 
             // エフェクト開始＆読み込み
-            yield return CoroutineUtils.Merge(
+            yield return new MergedCoroutine(
                 resolver.EnterEffectRoutine(),
                 resolver.LoadNextRoutine());
 
             // 閉じる＆開く＆エフェクト終了
-            yield return CoroutineUtils.Merge(
+            yield return new MergedCoroutine(
                 resolver.ClosePrevRoutine(immediate),
                 resolver.OpenNextRoutine(immediate),
                 resolver.ExitEffectRoutine());
 
             // 解放
-            yield return resolver.UnloadPrevRoutine();
+            resolver.UnloadPrev();
 
             // アクティブ化
             resolver.ActivateNext();

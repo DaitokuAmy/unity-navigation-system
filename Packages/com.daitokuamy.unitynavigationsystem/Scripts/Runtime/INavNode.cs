@@ -1,4 +1,5 @@
 using System.Collections;
+using VContainer;
 
 namespace UnityNavigationSystem {
     /// <summary>
@@ -7,18 +8,27 @@ namespace UnityNavigationSystem {
     public interface INavNode {
         /// <summary>接続されている親</summary>
         INavNode Parent { get; }
+        /// <summary>VContainer用のResolver</summary>
+        IObjectResolver ObjectResolver { get; }
 
         /// <summary>
         /// フォーカスの設定
         /// </summary>
         /// <param name="focus">フォーカス状態</param>
         void SetFocus(bool focus);
-
+        
         /// <summary>
-        /// 該当Nodeを子として登録可能か
+        /// 親の設定
         /// </summary>
-        /// <param name="node">子に登録する候補となるNode参照</param>
-        bool CanAddNode(INavNode node);
+        /// <param name="parent">親要素にあたるNode</param>
+        /// <param name="parentObjectResolver">VContainer用の親Resolver</param>
+        void SetParent(INavNode parent, IObjectResolver parentObjectResolver);
+        
+        /// <summary>
+        /// スタンバイ処理
+        /// </summary>
+        /// <param name="engine">Navigation制御用エンジン</param>
+        void Standby(NavigationEngine engine);
 
         /// <summary>
         /// 読み込み処理
@@ -55,5 +65,16 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="handle">遷移ハンドル</param>
         void Unload(TransitionHandle<INavNode> handle);
+
+        /// <summary>
+        /// 廃棄
+        /// </summary>
+        void Release();
+
+        /// <summary>
+        /// 強制終了
+        /// </summary>
+        /// <param name="handle">遷移ハンドル</param>
+        void Shutdown(TransitionHandle<INavNode> handle);
     }
 }

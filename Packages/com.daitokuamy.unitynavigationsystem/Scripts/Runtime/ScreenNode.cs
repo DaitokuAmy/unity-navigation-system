@@ -6,43 +6,56 @@ namespace UnityNavigationSystem {
     /// ※Session or Screen直下にのみ置けるNode
     /// </summary>
     public abstract class ScreenNode : NavNode, IScreenNode {
+        private DisposableScope _animationScope;
+        private bool _opened;
+        
         /// <inheritdoc/>
         void IScreenNode.PreOpen(TransitionHandle<INavNode> handle) {
             PreOpen(handle);
+            _animationScope = new DisposableScope();
         }
 
         /// <inheritdoc/>
         IEnumerator IScreenNode.OpenRoutine(TransitionHandle<INavNode> handle) {
-            yield return OpenRoutine(handle);
+            yield return OpenRoutine(handle, _animationScope);
         }
 
         /// <inheritdoc/>
         void IScreenNode.PostOpen(TransitionHandle<INavNode> handle) {
+            _animationScope?.Dispose();
+            _animationScope = null;
             PostOpen(handle);
+            _opened = true;
         }
 
         /// <inheritdoc/>
         void IScreenNode.PreClose(TransitionHandle<INavNode> handle) {
+            _opened = false;
             PreClose(handle);
+            _animationScope = new DisposableScope();
         }
 
         /// <inheritdoc/>
         IEnumerator IScreenNode.CloseRoutine(TransitionHandle<INavNode> handle) {
-            yield return CloseRoutine(handle);
+            yield return CloseRoutine(handle, _animationScope);
         }
 
         /// <inheritdoc/>
         void IScreenNode.PostClose(TransitionHandle<INavNode> handle) {
+            _animationScope?.Dispose();
+            _animationScope = null;
             PostClose(handle);
         }
         
         /// <inheritdoc/>
-        protected sealed override bool CanAddNode(INavNode node) {
-            if (node is ScreenNode) {
-                return true;
+        protected sealed override void Shutdown(TransitionHandle<INavNode> handle) {
+            _animationScope?.Dispose();
+            _animationScope = null;
+            
+            if (_opened) {
+                PreClose(handle);
+                PostClose(handle);
             }
-
-            return false;
         }
 
         /// <summary>
@@ -57,7 +70,8 @@ namespace UnityNavigationSystem {
         /// ※Immediate時は呼ばれない
         /// </summary>
         /// <param name="handle">遷移ハンドル</param>
-        protected virtual IEnumerator OpenRoutine(TransitionHandle<INavNode> handle) {
+        /// <param name="scope">アニメーションキャンセル用Scope</param>
+        protected virtual IEnumerator OpenRoutine(TransitionHandle<INavNode> handle, IScope scope) {
             yield break;
         }
 
@@ -80,7 +94,8 @@ namespace UnityNavigationSystem {
         /// ※Immediate時は呼ばれない
         /// </summary>
         /// <param name="handle">遷移ハンドル</param>
-        protected virtual IEnumerator CloseRoutine(TransitionHandle<INavNode> handle) {
+        /// <param name="scope">アニメーションキャンセル用Scope</param>
+        protected virtual IEnumerator CloseRoutine(TransitionHandle<INavNode> handle, IScope scope) {
             yield break;
         }
         

@@ -1,4 +1,4 @@
-namespace GameFramework.Core {    
+namespace UnityNavigationSystem {    
     /// <summary>
     /// AsyncOperationHandle用の拡張メソッド
     /// </summary>
