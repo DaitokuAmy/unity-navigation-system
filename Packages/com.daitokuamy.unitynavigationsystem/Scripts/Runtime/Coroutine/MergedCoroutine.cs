@@ -1,0 +1,72 @@
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace UnityNavigationSystem {
+    /// <summary>
+    /// 並列実行用コルーチン
+    /// </summary>
+    public class MergedCoroutine : IEnumerator {
+        private readonly Coroutine[] _coroutines;
+
+        /// <inheritdoc/>
+        object IEnumerator.Current => null;
+        
+        /// <summary>完了しているか</summary>
+        public bool IsDone { get; private set; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="enumerators">非同期処理リスト</param>
+        public MergedCoroutine(params IEnumerator[] enumerators) {
+            _coroutines = enumerators.Select(x => new Coroutine(x))
+                .ToArray();
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="enumerators">非同期処理リスト</param>
+        public MergedCoroutine(IEnumerable<IEnumerator> enumerators) {
+            _coroutines = enumerators.Select(x => new Coroutine(x))
+                .ToArray();
+        }
+
+        /// <summary>
+        /// リセット処理
+        /// </summary>
+        public void Reset() {
+            for (var i = 0; i < _coroutines.Length; i++) {
+                var coroutine = (IEnumerator)_coroutines[i];
+                coroutine?.Reset();
+            }
+        }
+
+        /// <summary>
+        /// コルーチン進行
+        /// </summary>
+        /// <returns>次の処理があるか？</returns>
+        public bool MoveNext() {
+            var finished = true;
+
+            for (var i = 0; i < _coroutines.Length; i++) {
+                var coroutine = _coroutines[i];
+
+                if (coroutine == null) {
+                    continue;
+                }
+
+                if (!coroutine.MoveNext()) {
+                    _coroutines[i] = null;
+                }
+                else {
+                    finished = false;
+                }
+            }
+
+            IsDone = finished;
+            return !IsDone;
+        }
+    }
+}

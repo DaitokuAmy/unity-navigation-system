@@ -1,0 +1,59 @@
+using System.Collections;
+
+namespace UnityNavigationSystem {
+    /// <summary>
+    /// ナビゲーションシステムで管理されるノードの基本インターフェース
+    /// </summary>
+    public interface INavNode {
+        /// <summary>接続されている親</summary>
+        INavNode Parent { get; }
+
+        /// <summary>
+        /// フォーカスの設定
+        /// </summary>
+        /// <param name="focus">フォーカス状態</param>
+        void SetFocus(bool focus);
+
+        /// <summary>
+        /// 該当Nodeを子として登録可能か
+        /// </summary>
+        /// <param name="node">子に登録する候補となるNode参照</param>
+        bool CanAddNode(INavNode node);
+
+        /// <summary>
+        /// 読み込み処理
+        /// </summary>
+        /// <param name="handle">遷移ハンドル</param>
+        IEnumerator LoadRoutine(TransitionHandle<INavNode> handle);
+
+        /// <summary>
+        /// 初期化処理
+        /// </summary>
+        /// <param name="handle">遷移ハンドル</param>
+        IEnumerator InitializeRoutine(TransitionHandle<INavNode> handle);
+
+        /// <summary>
+        /// アクティブ時処理
+        /// </summary>
+        /// <param name="handle">遷移ハンドル</param>
+        void Activate(TransitionHandle<INavNode> handle);
+
+        /// <summary>
+        /// 非アクティブ時処理
+        /// </summary>
+        /// <param name="handle">遷移ハンドル</param>
+        void Deactivate(TransitionHandle<INavNode> handle);
+
+        /// <summary>
+        /// 終了処理
+        /// </summary>
+        /// <param name="handle">遷移ハンドル</param>
+        void Terminate(TransitionHandle<INavNode> handle);
+
+        /// <summary>
+        /// アンロード処理
+        /// </summary>
+        /// <param name="handle">遷移ハンドル</param>
+        void Unload(TransitionHandle<INavNode> handle);
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "name": "com.daitokuamy.unitynavigationsystem",
+    "displayName": "Unity Navigation System",
+    "version": "0.9.0",
+    "unity": "6000.0",
+    "license" : "MIT",
+    "dependencies": { },
+    "author": {
+        "name": "Hironori Ito",
+        "url": "https://github.com/DaitokuAmy"
+    },
+    "description": "This feature supports asynchronous cancellation and subscription cancellation within Unity."
+}
