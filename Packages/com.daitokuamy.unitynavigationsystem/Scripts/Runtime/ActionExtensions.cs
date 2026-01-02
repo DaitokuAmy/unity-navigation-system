@@ -4,7 +4,7 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// Action用の拡張メソッド
     /// </summary>
-    public static class ActionExtensions {
+    internal static class ActionExtensions {
         /// <summary>
         /// Actionの逆順実行
         /// </summary>

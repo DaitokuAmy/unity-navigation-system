@@ -1,18 +1,10 @@
 {
   "dependencies": {
-    "com.cysharp.unitask": {
-      "version": "2.5.10",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
-    },
     "com.daitokuamy.unitynavigationsystem": {
       "version": "file:com.daitokuamy.unitynavigationsystem",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.cysharp.unitask": "2.5.10",
         "jp.hadashikick.vcontainer": "1.17.0"
       }
     },
