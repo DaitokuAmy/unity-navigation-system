@@ -44,7 +44,7 @@ namespace UnityNavigationSystem {
         /// <param name="setupAction">遷移先Node</param>
         /// <param name="transition">遷移方法</param>
         public TransitionHandle<INavNode> TransitionTo<TNode>(Action<TNode> setupAction, ITransition transition)
-            where TNode : ScreenNode {
+            where TNode : IScreenNode {
             return _tree.TransitionTo(typeof(TNode), false, node => {
                 setupAction?.Invoke((TNode)node);
             }, transition);

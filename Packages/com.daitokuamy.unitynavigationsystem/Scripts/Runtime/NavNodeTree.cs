@@ -10,6 +10,18 @@ namespace UnityNavigationSystem {
     /// </summary>
     public sealed class NavNodeTree : ITransitionResolver, IDisposable {
         /// <summary>
+        /// PreLoadの状態
+        /// </summary>
+        private enum PreLoadState {
+            /// <summary>PreLoad無し</summary>
+            None,
+            /// <summary>PreLoad中</summary>
+            PreLoading,
+            /// <summary>PreLoad済み</summary>
+            PreLoaded,
+        }
+        
+        /// <summary>
         /// 遷移情報
         /// </summary>
         private class TransitionInfo : ITransitionInfo<INavNode> {

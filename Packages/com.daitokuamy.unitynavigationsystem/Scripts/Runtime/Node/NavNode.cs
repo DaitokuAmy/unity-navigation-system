@@ -23,6 +23,12 @@ namespace UnityNavigationSystem {
 
         /// <inheritdoc/>
         void INavNode.SetFocus(bool focus) {
+            SetFocus(focus);
+        }
+
+        /// <inheritdoc/>
+        ITransition INavNode.OverrideTransition(INavNode nextNode, ITransition transition) {
+            return OverrideTransition(nextNode, transition);
         }
 
         /// <inheritdoc/>
@@ -121,6 +127,15 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="focus">フォーカス状態</param>
         protected virtual void SetFocus(bool focus) { }
+        
+        /// <summary>
+        /// 遷移方法を上書きする処理
+        /// </summary>
+        /// <param name="nextNode">遷移先のNode</param>
+        /// <param name="transition">現在の遷移手法</param>
+        protected virtual ITransition OverrideTransition(INavNode nextNode, ITransition transition) {
+            return transition;
+        }
 
         /// <summary>
         /// スタンバイ処理

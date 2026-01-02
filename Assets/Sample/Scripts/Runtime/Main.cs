@@ -25,7 +25,7 @@ namespace Sample {
             _rootResolver = builder.Build();
             
             _navigationEngine = NavigationEngineBuilder.Create()
-                .CreateRootNode(new RootNode(), root => {
+                .CreateTree(new RootNode(), root => {
                     root.AddSession(new TitleSessionNode(), session => {
                         session.AddScreen(new TitleTopScreenNode());
                     });
