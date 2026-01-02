@@ -12,14 +12,14 @@ namespace Sample {
         protected override void Activate(TransitionHandle<INavNode> handle, IScope scope) {
             base.Activate(handle, scope);
             
-            UIComponent.startButton.onClick.AddListener(() => {
+            UIComponent.fullScreenButton.onClick.AddListener(() => {
                 Engine.TransitionTo<BattleHudScreenNode>(null, new OutInTransition());
             });
         }
 
         /// <inheritdoc/>
         protected override void Deactivate(TransitionHandle<INavNode> handle) {
-            UIComponent.startButton.onClick.RemoveAllListeners();
+            UIComponent.fullScreenButton.onClick.RemoveAllListeners();
             
             base.Deactivate(handle);
         }

@@ -1,0 +1,175 @@
+using System;
+using System.Collections.Generic;
+
+namespace UnityNavigationSystem {
+    /// <summary>
+    /// Stack管理用StateRouter
+    /// </summary>
+    public class StateStackRouter<TKey, TState, TOption> : IStateRouter<TKey, TState, TOption>
+        where TState : class {
+        private readonly IStateContainer<TKey, TState, TOption> _stateContainer;
+        private readonly List<TKey> _stack = new();
+
+        private bool _disposed;
+
+        /// <inheritdoc/>
+        public TState Current => _stateContainer.Current;
+        /// <inheritdoc/>
+        public TKey CurrentKey => _stack.Count > 0 ? _stack[^1] : default;
+        /// <inheritdoc/>
+        public bool IsTransitioning => _stateContainer.IsTransitioning;
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public StateStackRouter(IStateContainer<TKey, TState, TOption> container) {
+            _stateContainer = container;
+        }
+
+        /// <summary>
+        /// 廃棄時処理
+        /// </summary>
+        public void Dispose() {
+            if (_disposed) {
+                return;
+            }
+
+            _disposed = true;
+
+            _stack.Clear();
+        }
+
+        /// <inheritdoc/>
+        TKey[] IStateRouter<TKey, TState, TOption>.GetStateKeys() {
+            return _stateContainer.GetStateKeys();
+        }
+
+        /// <summary>
+        /// スタックのクリア
+        /// </summary>
+        public void ClearStack() {
+            _stack.Clear();
+        }
+
+        /// <summary>
+        /// スタックのセット
+        /// </summary>
+        public void SetStack(IReadOnlyList<TKey> stack) {
+            _stack.Clear();
+            for (var i = 0; i < stack.Count; i++) {
+                if (_stateContainer.FindState(stack[i]) == null) {
+                    continue;
+                }
+
+                if (_stack.Contains(stack[i])) {
+                    continue;
+                }
+
+                _stack.Add(stack[i]);
+            }
+        }
+
+        /// <summary>
+        /// 遷移処理
+        /// </summary>
+        /// <param name="key">遷移ターゲットを決めるキー</param>
+        /// <param name="option">遷移時に渡すオプション</param>
+        /// <param name="setupAction">遷移先初期化用関数</param>
+        /// <param name="transition">遷移方法</param>
+        /// <param name="effects">遷移時演出</param>
+        public TransitionHandle<TState> TransitionTo(TKey key, TOption option = default, Action<TState> setupAction = null, ITransition transition = null, params ITransitionEffect[] effects) {
+            return TransitionToInternal(key, option, false, setupAction, transition, effects);
+        }
+
+        /// <summary>
+        /// 戻り遷移処理
+        /// </summary>
+        /// <param name="depth">戻り階層数(1～)</param>
+        /// <param name="option">遷移時に渡すオプション</param>
+        /// <param name="setupAction">遷移先初期化用関数</param>
+        /// <param name="transition">遷移方法</param>
+        /// <param name="effects">遷移時演出</param>
+        public TransitionHandle<TState> Back(int depth = 1, TOption option = default, Action<TState> setupAction = null, ITransition transition = null, params ITransitionEffect[] effects) {
+            // 深さのクランプ
+            if (depth > _stack.Count - 1) {
+                depth = _stack.Count - 1;
+            }
+
+            if (_stack.Count <= 1 || depth <= 0) {
+                return TransitionHandle<TState>.Empty;
+            }
+
+            // 戻り先を見つける
+            var backKey = _stack[_stack.Count - 1 - depth];
+
+            // 戻り遷移
+            return TransitionToInternal(backKey, option, true, setupAction, transition, effects);
+        }
+
+        /// <summary>
+        /// 状態リセット
+        /// </summary>
+        /// <param name="setupAction">遷移先初期化用関数</param>
+        /// <param name="effects">遷移時演出</param>
+        public TransitionHandle<TState> Reset(Action<TState> setupAction = null, params ITransitionEffect[] effects) {
+            return ResetInternal(setupAction, effects);
+        }
+
+        /// <summary>
+        /// 遷移実行
+        /// </summary>
+        /// <param name="key">遷移ターゲットを決めるキー</param>
+        /// <param name="option">遷移時に渡すオプション</param>
+        /// <param name="back">戻りか</param>
+        /// <param name="setupAction">遷移先初期化用関数</param>
+        /// <param name="transition">遷移方法</param>
+        /// <param name="effects">遷移時演出</param>
+        private TransitionHandle<TState> TransitionToInternal(TKey key, TOption option, bool back, Action<TState> setupAction, ITransition transition, params ITransitionEffect[] effects) {
+            // 既に遷移中なら失敗
+            if (IsTransitioning) {
+                return new TransitionHandle<TState>(new Exception("In transitioning"));
+            }
+
+            // 同じ場所なら何もしない
+            if (key.Equals(CurrentKey)) {
+                return TransitionHandle<TState>.Empty;
+            }
+
+            // NextNodeがない
+            if (_stateContainer.FindState(key) == null) {
+                return new TransitionHandle<TState>(new Exception($"Next key is not found. key:{key}"));
+            }
+
+            // スタックの中に含まれていたらそこまでスタックを戻す
+            var foundIndex = _stack.IndexOf(key);
+            if (foundIndex >= 0) {
+                _stack.RemoveRange(foundIndex, _stack.Count - foundIndex);
+            }
+
+            // スタックに追加
+            _stack.Add(key);
+
+            // 遷移実行
+            return _stateContainer.TransitionTo(key, option, back, setupAction, transition, effects);
+        }
+
+        /// <summary>
+        /// 現在のStateをリセットする
+        /// </summary>
+        /// <param name="setupAction">遷移先初期化用関数</param>
+        /// <param name="effects">遷移時演出</param>
+        private TransitionHandle<TState> ResetInternal(Action<TState> setupAction, params ITransitionEffect[] effects) {
+            // 既に遷移中なら失敗
+            if (IsTransitioning) {
+                return new TransitionHandle<TState>(new Exception("In transitioning"));
+            }
+
+            if (Current == null) {
+                return TransitionHandle<TState>.Empty;
+            }
+
+            // リセット実行
+            return _stateContainer.Reset(setupAction, effects);
+        }
+    }
+}

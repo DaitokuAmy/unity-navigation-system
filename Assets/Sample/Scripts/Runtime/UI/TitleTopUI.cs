@@ -6,7 +6,6 @@ namespace Sample {
     /// タイトルトップ用UI
     /// </summary>
     public sealed class TitleTopUI : MonoBehaviour {
-        [Tooltip("開始ボタン")]
-        public Button startButton;
+        public Button fullScreenButton;
     }
 }

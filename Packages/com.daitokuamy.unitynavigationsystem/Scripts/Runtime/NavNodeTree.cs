@@ -8,7 +8,15 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// NavNode構造を管理するツリー
     /// </summary>
-    public sealed class NavNodeTree : ITransitionResolver, IDisposable {
+    public sealed class NavNodeTree : ITransitionResolver, IStateContainer<Type, INavNode, NavNodeTree.TransitionOption> {
+        /// <summary>
+        /// 遷移オプション
+        /// </summary>
+        public class TransitionOption {
+            /// <summary>Rootから再構築して遷移するか</summary>
+            public bool Refresh = false;
+        }
+
         /// <summary>
         /// PreLoadの状態
         /// </summary>
@@ -20,7 +28,7 @@ namespace UnityNavigationSystem {
             /// <summary>PreLoad済み</summary>
             PreLoaded,
         }
-        
+
         /// <summary>
         /// 遷移情報
         /// </summary>
@@ -73,7 +81,9 @@ namespace UnityNavigationSystem {
         private TransitionInfo _transitionInfo;
         private CoroutineRunner _coroutineRunner;
 
-        /// <summary>遷移中か</summary>
+        /// <inheritdoc/>
+        public INavNode Current => _currentNode;
+        /// <inheritdoc/>
         public bool IsTransitioning => _transitionInfo != null;
 
         /// <summary>
@@ -99,7 +109,7 @@ namespace UnityNavigationSystem {
             _coroutineRunner.StopAllCoroutines();
             _coroutineRunner.Dispose();
             _coroutineRunner = null;
-            
+
             var emptyHandle = TransitionHandle<INavNode>.Empty;
 
             // PreLoad分をUnload
@@ -118,6 +128,17 @@ namespace UnityNavigationSystem {
                 var node = _runningNodes[i];
                 node.Shutdown(emptyHandle);
             }
+        }
+
+
+        /// <inheritdoc/>
+        INavNode IStateContainer<Type, INavNode, TransitionOption>.FindState(Type key) {
+            return _nodeMap.GetValueOrDefault(key);
+        }
+
+        /// <inheritdoc/>
+        Type[] IStateContainer<Type, INavNode, TransitionOption>.GetStateKeys() {
+            return _nodeMap.Keys.ToArray();
         }
 
         /// <inheritdoc/>
@@ -299,16 +320,9 @@ namespace UnityNavigationSystem {
         public void Update() {
             _coroutineRunner?.Update();
         }
-        
-        /// <summary>
-        /// 遷移処理
-        /// </summary>
-        /// <param name="nodeType"></param>
-        /// <param name="back"></param>
-        /// <param name="setupAction"></param>
-        /// <param name="transition"></param>
-        /// <param name="effects"></param>
-        public TransitionHandle<INavNode> TransitionTo(Type nodeType, bool back, Action<INavNode> setupAction, ITransition transition, params ITransitionEffect[] effects) {
+
+        /// <inheritdoc/>
+        public TransitionHandle<INavNode> TransitionTo(Type nodeType, TransitionOption option, bool back, Action<INavNode> setupAction, ITransition transition, params ITransitionEffect[] effects) {
             if (IsTransitioning) {
                 throw new Exception("In transitioning");
             }
@@ -325,22 +339,25 @@ namespace UnityNavigationSystem {
             var prevNode = _currentNode;
 
             // 遷移先の共通親を探す
-            var baseParent = prevNode;
-            while (baseParent != null) {
-                var p = nextNode;
-                while (p != null) {
-                    if (p == baseParent) {
+            var baseParent = default(INavNode);
+            if (option == null || !option.Refresh) {
+                baseParent = prevNode;
+                while (baseParent != null) {
+                    var p = nextNode;
+                    while (p != null) {
+                        if (p == baseParent) {
+                            break;
+                        }
+
+                        p = p.Parent;
+                    }
+
+                    if (p != null) {
                         break;
                     }
 
-                    p = p.Parent;
+                    baseParent = baseParent.Parent;
                 }
-
-                if (p != null) {
-                    break;
-                }
-
-                baseParent = baseParent.Parent;
             }
 
             // 閉じるNodeリスト
@@ -380,6 +397,64 @@ namespace UnityNavigationSystem {
             }
 
             _coroutineRunner.StartCoroutine(TransitionRoutine(nextNode, setupAction, transition),
+                FinishTransition,
+                FinishTransition,
+                ex => {
+                    Debug.LogException(ex);
+                    FinishTransition();
+                });
+
+            // ハンドルの返却
+            return new TransitionHandle<INavNode>(_transitionInfo);
+        }
+
+        /// <inheritdoc/>
+        public TransitionHandle<INavNode> Reset(Action<INavNode> setupAction, params ITransitionEffect[] effects) {
+            if (IsTransitioning) {
+                throw new Exception("In transitioning");
+            }
+
+            if (Current == null) {
+                throw new Exception("Current situation is null");
+            }
+
+            // 閉じるNodeリスト
+            var prevNodes = new List<INavNode>();
+            var node = Current;
+            while (node != null) {
+                prevNodes.Add(node);
+                node = node.Parent;
+            }
+
+            // 開くNodeリスト
+            var nextNodes = new List<INavNode>();
+            for (var i = prevNodes.Count - 1; i >= 0; i--) {
+                nextNodes.Add(prevNodes[i]);
+            }
+
+            // 遷移はOutIn専用
+            var transition = (ITransition)new OutInTransition();
+
+            // 遷移情報を生成            
+            _transitionInfo = new TransitionInfo {
+                Direction = TransitionDirection.Forward,
+                PrevNodes = prevNodes,
+                NextNodes = nextNodes,
+                State = TransitionState.Standby,
+                Effects = effects
+            };
+
+            // 初期化通知
+            setupAction?.Invoke(Current);
+
+            // コルーチンの登録
+            void FinishTransition() {
+                var transitionInfo = _transitionInfo;
+                _transitionInfo = null;
+                transitionInfo.SendFinish();
+            }
+
+            _coroutineRunner.StartCoroutine(transition.TransitionRoutine(this),
                 FinishTransition,
                 FinishTransition,
                 ex => {
@@ -438,7 +513,7 @@ namespace UnityNavigationSystem {
             if (!_preLoadInfos.Remove(nodeType, out var preLoadInfo)) {
                 return;
             }
-            
+
             // Running中の物は無視
             if (!_runningNodes.Contains(preLoadInfo.Node)) {
                 return;
