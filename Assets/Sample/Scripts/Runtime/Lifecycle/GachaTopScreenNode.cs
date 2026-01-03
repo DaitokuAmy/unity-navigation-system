@@ -2,25 +2,19 @@ using UnityNavigationSystem;
 
 namespace Sample {
     /// <summary>
-    /// TitleTop用のScreenNode
+    /// GachaTop用のScreenNode
     /// </summary>
-    public sealed class TitleTopScreenNode : ScreenNode<TitleTopUI> {
+    public sealed class GachaTopScreenNode : ScreenNode<GachaTopUI> {
         /// <inheritdoc/>
-        protected override string PrefabPath => "TitleTop";
+        protected override string PrefabPath => "GachaTop";
 
         /// <inheritdoc/>
         protected override void Activate(TransitionHandle<INavNode> handle, IScope scope) {
             base.Activate(handle, scope);
-            
-            UIComponent.fullScreenButton.onClick.AddListener(() => {
-                Engine.TransitionTo<HomeTopScreenNode>(null, new OutInTransition());
-            });
         }
 
         /// <inheritdoc/>
         protected override void Deactivate(TransitionHandle<INavNode> handle) {
-            UIComponent.fullScreenButton.onClick.RemoveAllListeners();
-            
             base.Deactivate(handle);
         }
     }

@@ -77,12 +77,11 @@ namespace UnityNavigationSystem {
         private readonly List<INavNode> _runningNodes = new();
         private readonly Dictionary<Type, PreLoadInfo> _preLoadInfos = new();
 
-        private INavNode _currentNode;
         private TransitionInfo _transitionInfo;
         private CoroutineRunner _coroutineRunner;
 
         /// <inheritdoc/>
-        public INavNode Current => _currentNode;
+        public INavNode Current => _runningNodes.Count > 0 ? _runningNodes[^1] : null;
         /// <inheritdoc/>
         public bool IsTransitioning => _transitionInfo != null;
 
@@ -332,11 +331,11 @@ namespace UnityNavigationSystem {
             }
 
             // 遷移する必要がなければ無視
-            if (_currentNode == nextNode) {
+            if (Current == nextNode) {
                 return TransitionHandle<INavNode>.Empty;
             }
 
-            var prevNode = _currentNode;
+            var prevNode = Current;
 
             // 遷移先の共通親を探す
             var baseParent = default(INavNode);
@@ -543,7 +542,7 @@ namespace UnityNavigationSystem {
             }
 
             // 初期化処理
-            setupAction?.Invoke(_currentNode);
+            setupAction?.Invoke(Current);
 
             yield return transition.TransitionRoutine(this);
         }

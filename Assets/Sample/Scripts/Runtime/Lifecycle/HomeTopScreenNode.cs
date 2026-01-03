@@ -2,24 +2,24 @@ using UnityNavigationSystem;
 
 namespace Sample {
     /// <summary>
-    /// TitleTop用のScreenNode
+    /// HomeTop用のScreenNode
     /// </summary>
-    public sealed class TitleTopScreenNode : ScreenNode<TitleTopUI> {
+    public sealed class HomeTopScreenNode : ScreenNode<HomeTopUI> {
         /// <inheritdoc/>
-        protected override string PrefabPath => "TitleTop";
+        protected override string PrefabPath => "HomeTop";
 
         /// <inheritdoc/>
         protected override void Activate(TransitionHandle<INavNode> handle, IScope scope) {
             base.Activate(handle, scope);
             
-            UIComponent.fullScreenButton.onClick.AddListener(() => {
-                Engine.TransitionTo<HomeTopScreenNode>(null, new OutInTransition());
+            UIComponent.battleButton.onClick.AddListener(() => {
+                Engine.TransitionTo<BattleHudScreenNode>(null, new OutInTransition());
             });
         }
 
         /// <inheritdoc/>
         protected override void Deactivate(TransitionHandle<INavNode> handle) {
-            UIComponent.fullScreenButton.onClick.RemoveAllListeners();
+            UIComponent.battleButton.onClick.RemoveAllListeners();
             
             base.Deactivate(handle);
         }

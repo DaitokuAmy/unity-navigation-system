@@ -40,10 +40,10 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="sessionNode">追加対象のNode</param>
         /// <param name="buildAction">子要素を追加するためのアクション</param>
-        public SessionNodeBuilder AddSession(ISessionNode sessionNode, Action<SessionNodeBuilder> buildAction = null) {
+        public RootNodeBuilder AddSession(ISessionNode sessionNode, Action<SessionNodeBuilder> buildAction = null) {
             var child = new SessionNodeBuilder(sessionNode, buildAction);
             _childBuilders.Add(child);
-            return child;
+            return this;
         }
 
         /// <summary>
@@ -100,10 +100,10 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="screenNode">追加対象のNode</param>
         /// <param name="buildAction">子要素を追加するためのアクション</param>
-        public ScreenNodeBuilder AddScreen(IScreenNode screenNode, Action<ScreenNodeBuilder> buildAction = null) {
+        public SessionNodeBuilder AddScreen(IScreenNode screenNode, Action<ScreenNodeBuilder> buildAction = null) {
             var child = new ScreenNodeBuilder(screenNode, buildAction);
             _childBuilders.Add(child);
-            return child;
+            return this;
         }
     }
 
@@ -145,7 +145,7 @@ namespace UnityNavigationSystem {
         public ScreenNodeBuilder AddScreen(IScreenNode screenNode, Action<ScreenNodeBuilder> buildAction = null) {
             var child = new ScreenNodeBuilder(screenNode, buildAction);
             _childBuilders.Add(child);
-            return child;
+            return this;
         }
     }
 

@@ -32,7 +32,9 @@ namespace Sample {
 
         /// <inheritdoc/>
         protected override void Unload(TransitionHandle<INavNode> handle) {
-            SceneManager.UnloadSceneAsync(ScenePath);
+            if (!string.IsNullOrEmpty(EmptyScenePath)) {
+                SceneManager.LoadScene(EmptyScenePath, LoadSceneMode.Single);
+            }
         }
     }
 }

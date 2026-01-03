@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityNavigationSystem;
 using VContainer;
@@ -26,21 +27,41 @@ namespace Sample {
 
             _navigationEngine = NavigationEngineBuilder.Create()
                 .CreateTree(new RootNode(), root => {
-                    root.AddSession(new TitleSessionNode(), session => {
-                        session.AddScreen(new TitleTopScreenNode());
-                    });
-                    root.AddSession(new BattleSessionNode(), session => {
-                        session.AddScreen(new BattleHudScreenNode(), battleHud => {
-                            battleHud.AddScreen(new BattleDialogScreenNode());
+                    root.AddSession(new TitleSessionNode(), title => {
+                            title.AddScreen(new TitleTopScreenNode());
+                        })
+                        .AddSession(new OutGameSessionNode(), outGame => {
+                            outGame.AddScreen(new HomeScreenNode(), home => {
+                                home.AddScreen(new HomeTopScreenNode())
+                                    .AddScreen(new GachaTopScreenNode())
+                                    .AddScreen(new PartyTopScreenNode());
+                            });
+                        })
+                        .AddSession(new BattleSessionNode(), battle => {
+                            battle.AddScreen(new BattleHudScreenNode(), battleHud => {
+                                battleHud.AddScreen(new BattleDialogScreenNode());
+                            });
                         });
-                    });
                 })
                 .CreateRouter(tree => {
                     var router = new NavNodeTreeRouter(tree);
-                    var titleTop = router.ConnectRoot(typeof(TitleTopScreenNode));
-                    var battleHud = titleTop.Connect(typeof(BattleHudScreenNode));
-                    var battleDialog = battleHud.Connect(typeof(BattleDialogScreenNode));
-                    router.SetFallbackNode(battleHud);
+                    StateTreeRouterBuilder<Type, INavNode, NavNodeTree.TransitionOption>.Create()
+                        .AddRoot(typeof(TitleTopScreenNode), titleTop => {
+                            titleTop.Connect(typeof(HomeTopScreenNode), homeTop => {
+                                homeTop.SetFallback(homeTop);
+                                homeTop.Connect(typeof(GachaTopScreenNode), gachaTop => {
+                                        gachaTop.SetFallback(homeTop);
+                                    })
+                                    .Connect(typeof(PartyTopScreenNode), partyTop => {
+                                        partyTop.SetFallback(homeTop);
+                                    })
+                                    .Connect(typeof(BattleHudScreenNode), battleHud => {
+                                        battleHud.Connect(typeof(BattleDialogScreenNode))
+                                            .SetFallback();
+                                    });
+                            });
+                        })
+                        .Build(router);
                     return router;
                 })
                 .Build(_rootResolver);
