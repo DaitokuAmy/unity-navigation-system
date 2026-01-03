@@ -22,8 +22,8 @@ namespace Sample {
         /// 開始処理
         /// </summary>
         private void Start() {
-            var builder = new ContainerBuilder();
-            _rootResolver = builder.Build();
+            var containerBuilder = new ContainerBuilder();
+            _rootResolver = containerBuilder.Build();
 
             _navigationEngine = NavigationEngineBuilder.Create()
                 .CreateTree(new RootNode(), root => {
@@ -81,6 +81,7 @@ namespace Sample {
         /// </summary>
         private void OnDestroy() {
             _navigationEngine?.Dispose();
+            _rootResolver?.Dispose();
         }
     }
 }
