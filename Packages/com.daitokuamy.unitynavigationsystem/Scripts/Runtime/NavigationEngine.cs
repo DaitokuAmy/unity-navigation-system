@@ -40,6 +40,14 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
+        /// Routerの取得
+        /// </summary>
+        public TRouter GetRouter<TRouter>() 
+            where TRouter : IStateRouter<Type, INavNode, NavNodeTree.TransitionOption>, class {
+            return _router as TRouter;
+        }
+
+        /// <summary>
         /// 遷移実行
         /// </summary>
         /// <param name="option">遷移オプション</param>
