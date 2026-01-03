@@ -8,7 +8,7 @@ namespace Sample {
     /// </summary>
     public abstract class SceneSessionNode : SessionNode {
         /// <summary>読み込み前の空シーンPath</summary>
-        protected virtual string EmptyScenePath => string.Empty;
+        protected virtual string EmptyScenePath => "empty";
         /// <summary>読み込むシーンPath</summary>
         protected abstract string ScenePath { get; }
 

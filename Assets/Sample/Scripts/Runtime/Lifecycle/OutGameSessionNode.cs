@@ -4,8 +4,6 @@ namespace Sample {
     /// </summary>
     public sealed class OutGameSessionNode : SceneSessionNode {
         /// <inheritdoc/>
-        protected override string EmptyScenePath => "empty";
-        /// <inheritdoc/>
         protected override string ScenePath => "out_game";
     }
 }
