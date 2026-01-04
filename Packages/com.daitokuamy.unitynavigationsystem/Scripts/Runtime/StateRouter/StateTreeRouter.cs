@@ -7,7 +7,6 @@ namespace UnityNavigationSystem {
     /// Tree管理用StateRouter
     /// </summary>
     public class StateTreeRouter<TKey, TState, TOption> : IStateRouter<TKey, TState, TOption>
-        where TKey : class
         where TState : class {
         private readonly IStateContainer<TKey, TState, TOption> _stateContainer;
         private readonly Dictionary<TKey, StateTreeNode<TKey>> _globalFallbackNodes = new();
@@ -31,7 +30,7 @@ namespace UnityNavigationSystem {
         /// </summary>
         public StateTreeRouter(IStateContainer<TKey, TState, TOption> container) {
             _stateContainer = container;
-            _rootNode = new StateTreeNode<TKey>(null, null);
+            _rootNode = new StateTreeNode<TKey>(default, null);
         }
 
         /// <summary>
@@ -58,6 +57,26 @@ namespace UnityNavigationSystem {
         /// <inheritdoc/>
         public TKey[] GetStateKeys() {
             return GetNodes().Select(x => x.Key).Distinct().ToArray();
+        }
+
+        /// <inheritdoc/>
+        public TKey GetBackStateKey(int depth = 1) {
+            if (CurrentNode == null) {
+                return default;
+            }
+            
+            // 戻り先のノードを取得
+            var backNode = CurrentNode;
+            for (var i = 0; i < depth; i++) {
+                var b = backNode.GetPrevious();
+                if (b == null || !b.IsValid) {
+                    break;
+                }
+
+                backNode = b;
+            }
+
+            return backNode.Key;
         }
 
         /// <summary>

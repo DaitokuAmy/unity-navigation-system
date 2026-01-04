@@ -44,6 +44,22 @@ namespace UnityNavigationSystem {
             return _stateContainer.GetStateKeys();
         }
 
+        /// <inheritdoc/>
+        public TKey GetBackStateKey(int depth = 1) {
+            // 深さのクランプ
+            if (depth > _stack.Count - 1) {
+                depth = _stack.Count - 1;
+            }
+
+            if (_stack.Count <= 1 || depth <= 0) {
+                return default;
+            }
+
+            // 戻り先を見つける
+            var backKey = _stack[_stack.Count - 1 - depth];
+            return backKey;
+        }
+
         /// <summary>
         /// スタックのクリア
         /// </summary>

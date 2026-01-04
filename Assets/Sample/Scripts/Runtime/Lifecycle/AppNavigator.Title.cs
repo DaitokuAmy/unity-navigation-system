@@ -4,10 +4,11 @@ namespace Sample.Lifecycle {
     /// <summary>
     /// アプリ内遷移用クラス
     /// </summary>
-    partial class AppNavigator : IAppNavigator {
+    partial class AppNavigator {
         /// <inheritdoc/>
         void IAppNavigator.GoToTitle() {
-            _engine.TransitionTo<TitleTopScreenNode>(null, OutInTransition);
+            var (transition, transitionEffects) = GetDefaultTransitionInfo<OutGameSessionNode>();
+            _engine.TransitionTo<TitleTopScreenNode>(null, transition, transitionEffects);
         }
     }
 }

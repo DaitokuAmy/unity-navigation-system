@@ -6,6 +6,8 @@ namespace UnityNavigationSystem {
     /// ナビゲーションシステムで管理されるノードの基本インターフェース
     /// </summary>
     public interface INavNode {
+        /// <summary>Loadを並列で実行可能か</summary>
+        bool IsParallelLoading { get; }
         /// <summary>接続されている親</summary>
         INavNode Parent { get; }
         /// <summary>VContainer用のResolver</summary>

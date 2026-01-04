@@ -3,5 +3,7 @@ namespace UnityNavigationSystem {
     /// RootとなるNavNode
     /// </summary>
     public abstract class RootNode : NavNode, IRootNode {
+        /// <inheritdoc/>
+        protected override bool IsParallelLoading => false;
     }
 }

@@ -4,35 +4,23 @@ namespace Sample.Lifecycle {
     /// <summary>
     /// アプリ内遷移用クラス
     /// </summary>
-    partial class AppNavigator : IAppNavigator {
+    partial class AppNavigator {
         /// <inheritdoc/>
         void IAppNavigator.GoToHome() {
-            var transition = OutInTransition;
-            if (_engine.CheckCurrentNodeParentType<OutGameSessionNode>()) {
-                transition = CrossTransition;
-            }
-
-            _engine.TransitionTo<HomeTopScreenNode>(null, transition);
+            var (transition, transitionEffects) = GetDefaultTransitionInfo<OutGameSessionNode>();
+            _engine.TransitionTo<HomeTopScreenNode>(null, transition, transitionEffects);
         }
 
         /// <inheritdoc/>
         void IAppNavigator.GoToGacha() {
-            var transition = OutInTransition;
-            if (_engine.CheckCurrentNodeParentType<OutGameSessionNode>()) {
-                transition = CrossTransition;
-            }
-
-            _engine.TransitionTo<GachaTopScreenNode>(null, transition);
+            var (transition, transitionEffects) = GetDefaultTransitionInfo<OutGameSessionNode>();
+            _engine.TransitionTo<GachaTopScreenNode>(null, transition, transitionEffects);
         }
 
         /// <inheritdoc/>
         void IAppNavigator.GoToParty() {
-            var transition = OutInTransition;
-            if (_engine.CheckCurrentNodeParentType<OutGameSessionNode>()) {
-                transition = CrossTransition;
-            }
-
-            _engine.TransitionTo<PartyTopScreenNode>(null, transition);
+            var (transition, transitionEffects) = GetDefaultTransitionInfo<OutGameSessionNode>();
+            _engine.TransitionTo<PartyTopScreenNode>(null, transition, transitionEffects);
         }
     }
 }

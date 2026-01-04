@@ -19,6 +19,12 @@ namespace UnityNavigationSystem {
         TKey[] GetStateKeys();
         
         /// <summary>
+        /// 戻り先のステートキー
+        /// </summary>
+        /// <param name="depth">戻る深さ</param>
+        TKey GetBackStateKey(int depth = 1);
+        
+        /// <summary>
         /// 遷移処理
         /// </summary>
         /// <param name="key">遷移ターゲットを決めるキー</param>

@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using Sample.Application;
+using Sample.UI;
 using UnityEngine;
 using UnityNavigationSystem;
 using VContainer;
@@ -11,7 +13,6 @@ namespace Sample.Lifecycle {
     public class Main : MonoBehaviour {
         private IObjectResolver _rootResolver;
         private NavigationEngine _navigationEngine;
-        private AppNavigator _appNavigator;
 
         /// <summary>
         /// 生成時処理
@@ -23,12 +24,18 @@ namespace Sample.Lifecycle {
         /// <summary>
         /// 開始処理
         /// </summary>
-        private void Start() {
+        private IEnumerator Start() {
+            // DIのRootContainer構築
             var containerBuilder = new ContainerBuilder();
-            _appNavigator = new AppNavigator();
-            containerBuilder.RegisterInstance<IAppNavigator>(_appNavigator);
+            var appNavigator = new AppNavigator();
+            containerBuilder.RegisterInstance<IAppNavigator>(appNavigator);
+            containerBuilder.Register<ResidentUIService>(Lifetime.Singleton);
             _rootResolver = containerBuilder.Build();
+            
+            // Inject
+            _rootResolver.Inject(appNavigator);
 
+            // 遷移エンジン構築
             _navigationEngine = NavigationEngineBuilder.Create()
                 .CreateTree(new RootNode(), root => {
                     root.AddSession(new TitleSessionNode(), title => {
@@ -69,9 +76,19 @@ namespace Sample.Lifecycle {
                     return router;
                 })
                 .Build(_rootResolver);
+            
+            // Navigator初期化
+            appNavigator.Initialize(_navigationEngine);
+            
+            // 常駐UI生成
+            var request = Resources.LoadAsync<GameObject>("Resident");
+            yield return request;
+            var residentPrefab = request.asset as GameObject;
+            var residentObject = Instantiate(residentPrefab, transform, false);
+            var residentUIService = _rootResolver.Resolve<ResidentUIService>();
+            residentUIService.Initialize(residentObject.GetComponent<ResidentUI>());
 
-            _appNavigator.Initialize(_navigationEngine);
-
+            // 初期画面遷移
             var navigator = _rootResolver.Resolve<IAppNavigator>();
             navigator.GoToTitle();
         }

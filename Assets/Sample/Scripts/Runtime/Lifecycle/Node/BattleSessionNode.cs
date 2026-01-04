@@ -10,7 +10,7 @@ namespace Sample.Lifecycle {
     public sealed class BattleSessionNode : SceneSessionNode {
         [Inject]
         private IBattleSessionInputPort _sessionInputPort;
-        
+
         /// <inheritdoc/>
         protected override string ScenePath => "battle";
 

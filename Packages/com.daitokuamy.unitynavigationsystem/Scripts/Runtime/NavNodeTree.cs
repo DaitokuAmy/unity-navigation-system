@@ -187,11 +187,18 @@ namespace UnityNavigationSystem {
 
                     continue;
                 }
+                
+                // 並列ロードしない物は順番にロード
+                if (!node.IsParallelLoading) {
+                    yield return node.LoadRoutine(handle);
+                    continue;
+                }
 
-                routines.Add(_transitionInfo.NextNodes[i].LoadRoutine(handle));
+                // 並列ロード可能な物はまとめる
+                routines.Add(node.LoadRoutine(handle));
             }
 
-            // 読み込み待ち
+            // 並列読み込み待ち
             yield return new MergedCoroutine(routines);
 
             // PreLoad中の物があれば待つ
@@ -466,25 +473,63 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
-        /// 現在カレントなNodeの親に特定のNavNode型が存在するかチェック
+        /// カレントNodeの階層に特定のNavNode型が存在するかチェック
+        /// ※カレントもチェック対象
         /// </summary>
-        public bool CheckCurrentNodeParentType<TNode>()
-            where TNode : INavNode {
-            if (Current == null) {
-                return false;
-            }
-
-            var parentType = typeof(TNode);
-            var parent = Current.Parent;
-            while (parent != null) {
-                if (parent.GetType() == parentType) {
+        public bool CheckNodeTypeInParent<T>()
+            where T : INavNode {
+            var searchType = typeof(T);
+            var node = Current;
+            while (node != null) {
+                if (node.GetType().IsAssignableFrom(searchType)) {
                     return true;
                 }
 
-                parent = parent.Parent;
+                node = node.Parent;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// カレントNodeの階層の中で特定の型のNodeを取得
+        /// ※カレントもチェック対象
+        /// </summary>
+        public T GetNodeInParent<T>()
+            where T : INavNode {
+            var searchType = typeof(T);
+            var node = Current;
+            while (node != null) {
+                if (searchType.IsAssignableFrom(node.GetType())) {
+                    return (T)node;
+                }
+
+                node = node.Parent;
+            }
+
+            return default;
+        }
+
+        /// <summary>
+        /// 特定Nodeの階層の中で特定の型のNodeを取得
+        /// ※指定Nodeもチェック対象
+        /// </summary>
+        public T GetNodeInParent<T>(Type targetNodeType)
+            where T : INavNode {
+            if (!_nodeMap.TryGetValue(targetNodeType, out var node)) {
+                return default;
+            }
+            
+            var searchType = typeof(T);
+            while (node != null) {
+                if (searchType.IsAssignableFrom(node.GetType())) {
+                    return (T)node;
+                }
+
+                node = node.Parent;
+            }
+
+            return default;
         }
 
         /// <summary>

@@ -165,11 +165,40 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
-        /// 現在カレントなNodeの親に特定のNavNode型が存在するかチェック
+        /// カレントNodeの階層に特定のNavNode型が存在するかチェック
+        /// ※カレントもチェック対象
         /// </summary>
-        public bool CheckCurrentNodeParentType<TNode>()
+        public bool CheckNodeTypeInParent<TNode>()
             where TNode : INavNode {
-            return _tree.CheckCurrentNodeParentType<TNode>();
+            return _tree.CheckNodeTypeInParent<TNode>();
+        }
+
+        /// <summary>
+        /// カレントNodeの階層の中で特定の型のNodeを取得
+        /// ※カレントもチェック対象
+        /// </summary>
+        public TNode GetNodeInParent<TNode>()
+            where TNode : INavNode {
+            return _tree.GetNodeInParent<TNode>();
+        }
+
+        /// <summary>
+        /// 戻り先のNodeの階層の中で特定型のNodeを取得
+        /// ※戻り先もチェック対象
+        /// </summary>
+        /// <param name="depth">戻る深さ</param>
+        public TNode GetBackNodeInParent<TNode>(int depth = 1)
+            where TNode : INavNode {
+            if (_router == null) {
+                return default;
+            }
+
+            var backKey = _router.GetBackStateKey(depth);
+            if (backKey == null) {
+                return default;
+            }
+            
+            return _tree.GetNodeInParent<TNode>(backKey);
         }
 
         /// <summary>

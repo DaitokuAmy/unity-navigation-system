@@ -4,20 +4,17 @@ namespace Sample.Lifecycle {
     /// <summary>
     /// アプリ内遷移用クラス
     /// </summary>
-    partial class AppNavigator : IAppNavigator {
+    partial class AppNavigator {
         /// <inheritdoc/>
         void IAppNavigator.GoToBattle() {
-            _engine.TransitionTo<BattleHudScreenNode>(null, OutInTransition);
+            var (transition, transitionEffects) = GetDefaultTransitionInfo<BattleSessionNode>();
+            _engine.TransitionTo<BattleHudScreenNode>(null, transition, transitionEffects);
         }
 
         /// <inheritdoc/>
         void IAppNavigator.GoToBattlePause() {
-            var transition = OutInTransition;
-            if (_engine.CheckCurrentNodeParentType<BattleSessionNode>()) {
-                transition = CrossTransition;
-            }
-
-            _engine.TransitionTo<BattlePauseScreenNode>(null, transition);
+            var (transition, transitionEffects) = GetDefaultTransitionInfo<BattleSessionNode>();
+            _engine.TransitionTo<BattlePauseScreenNode>(null, transition, transitionEffects);
         }
     }
 }

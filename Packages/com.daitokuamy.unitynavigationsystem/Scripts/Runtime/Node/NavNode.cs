@@ -13,11 +13,16 @@ namespace UnityNavigationSystem {
         private INavNode _parent;
 
         /// <inheritdoc/>
+        bool INavNode.IsParallelLoading => IsParallelLoading;
+        /// <inheritdoc/>
         INavNode INavNode.Parent => _parent;
+
+        /// <summary>Loadを並列で実行可能か</summary>
+        protected virtual bool IsParallelLoading => true;
 
         /// <summary>VContainer用のResolver</summary>
         public IObjectResolver ObjectResolver { get; private set; }
-        
+
         /// <summary>Navigation制御用エンジン</summary>
         protected NavigationEngine Engine { get; private set; }
 
@@ -127,7 +132,7 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="focus">フォーカス状態</param>
         protected virtual void SetFocus(bool focus) { }
-        
+
         /// <summary>
         /// 遷移方法を上書きする処理
         /// </summary>
