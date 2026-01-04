@@ -1,3 +1,5 @@
+using Sample.UI;
+
 namespace Sample.Lifecycle {
     /// <summary>
     /// GachaTop用のScreenNode

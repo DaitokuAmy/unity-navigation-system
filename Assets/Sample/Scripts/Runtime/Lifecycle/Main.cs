@@ -1,12 +1,10 @@
 using System;
 using Sample.Application;
-using Sample.Lifecycle;
 using UnityEngine;
 using UnityNavigationSystem;
 using VContainer;
-using RootNode = Sample.Lifecycle.RootNode;
 
-namespace Sample {
+namespace Sample.Lifecycle {
     /// <summary>
     /// メイン処理
     /// </summary>

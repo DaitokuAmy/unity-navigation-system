@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Sample {
+namespace Sample.UI {
     /// <summary>
     /// バトルHUD用UI
     /// </summary>

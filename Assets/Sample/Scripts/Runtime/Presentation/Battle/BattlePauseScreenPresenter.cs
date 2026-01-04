@@ -1,3 +1,5 @@
+using Sample.UI;
+
 namespace Sample.Presentation {
     /// <summary>
     /// BattlePauseUI用のPresenter

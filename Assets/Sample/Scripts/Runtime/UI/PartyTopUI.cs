@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Sample {
+namespace Sample.UI {
     /// <summary>
     /// パーティトップ画面用UI
     /// </summary>
