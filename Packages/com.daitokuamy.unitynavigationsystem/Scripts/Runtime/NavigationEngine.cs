@@ -157,11 +157,35 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
+        /// 現在カレントなNodeの取得
+        /// </summary>
+        /// <returns></returns>
+        public INavNode GetCurrentNode() {
+            return _tree.Current;
+        }
+
+        /// <summary>
         /// 現在カレントなNodeの親に特定のNavNode型が存在するかチェック
         /// </summary>
         public bool CheckCurrentNodeParentType<TNode>()
             where TNode : INavNode {
             return _tree.CheckCurrentNodeParentType<TNode>();
+        }
+
+        /// <summary>
+        /// NodeのPreLoad
+        /// </summary>
+        public AsyncOperationHandle PreLoad<TNode>()
+            where TNode : INavNode {
+            return _tree.PreLoad(typeof(TNode));
+        }
+        
+        /// <summary>
+        /// NodeのPreLoadをUnload
+        /// </summary>
+        public void UnPreLoad<TNode>()
+            where TNode : INavNode {
+            _tree.UnPreLoad(typeof(TNode));
         }
     }
 }
