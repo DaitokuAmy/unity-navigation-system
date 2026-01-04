@@ -1,8 +1,11 @@
 using System.Collections;
+using Sample.Application;
+using Sample.Presentation;
 using UnityEngine;
 using UnityNavigationSystem;
+using VContainer;
 
-namespace Sample {
+namespace Sample.Lifecycle {
     /// <summary>
     /// ScreenNode基底
     /// </summary>
@@ -14,6 +17,9 @@ namespace Sample {
         /// <summary>Resources内のPrefab配置Path</summary>
         protected abstract string PrefabPath { get; }
 
+        /// <summary>アプリ遷移用インスタンス</summary>
+        [Inject]
+        protected IAppNavigator AppNavigator { get; private set; }
         /// <summary>生成したUIComponent</summary>
         protected TUIComponent UIComponent { get; private set; }
 
@@ -31,6 +37,10 @@ namespace Sample {
             if (_loadedPrefab != null) {
                 _createdObject = Object.Instantiate(_loadedPrefab);
                 UIComponent = _createdObject.GetComponent<TUIComponent>();
+                var presenter = _createdObject.GetComponent<ScreenPresenter>();
+                if (presenter != null) {
+                    ObjectResolver.Inject(presenter);
+                }
             }
 
             yield break;

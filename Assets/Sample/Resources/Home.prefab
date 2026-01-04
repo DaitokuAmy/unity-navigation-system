@@ -629,6 +629,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8129161606292002046}
   - component: {fileID: 2804947897362750397}
+  - component: {fileID: 5050399624691971678}
   m_Layer: 0
   m_Name: Home
   m_TagString: Untagged
@@ -664,11 +665,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a15d5acea0e28ed418a4f47075a37af4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sample.HomeUI
-  fullScreenButton: {fileID: 0}
   backButton: {fileID: 1777285166117248198}
   homeButton: {fileID: 2806992761688636064}
   gachaButton: {fileID: 891967054541744088}
   partyButton: {fileID: 7869808569706797772}
+--- !u!114 &5050399624691971678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070946023708927144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7548baf5a03a33a409fc3556a042b24f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sample.Presentation.HomeScreenPresenter
+  uiComponent: {fileID: 2804947897362750397}
 --- !u!1 &4667318098524434626
 GameObject:
   m_ObjectHideFlags: 0

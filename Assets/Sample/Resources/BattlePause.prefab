@@ -267,8 +267,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8129161606292002046}
   - component: {fileID: 221352117115122570}
+  - component: {fileID: 67073828915532941}
   m_Layer: 0
-  m_Name: BattleDialog
+  m_Name: BattlePause
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -304,6 +305,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Sample.BattleDialogUI
   cancelButton: {fileID: 1601145373909304002}
   decideButton: {fileID: 1459061570069584447}
+--- !u!114 &67073828915532941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070946023708927144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86ea29a69d5d97c45b2c4042fadb734e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sample.Presentation.BattleDialogScreenPresenter
+  uiComponent: {fileID: 221352117115122570}
 --- !u!1 &5901185973846174840
 GameObject:
   m_ObjectHideFlags: 0

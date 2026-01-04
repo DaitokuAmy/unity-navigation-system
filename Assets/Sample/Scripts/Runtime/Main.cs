@@ -1,7 +1,10 @@
 using System;
+using Sample.Application;
+using Sample.Lifecycle;
 using UnityEngine;
 using UnityNavigationSystem;
 using VContainer;
+using RootNode = Sample.Lifecycle.RootNode;
 
 namespace Sample {
     /// <summary>
@@ -10,6 +13,7 @@ namespace Sample {
     public class Main : MonoBehaviour {
         private IObjectResolver _rootResolver;
         private NavigationEngine _navigationEngine;
+        private AppNavigator _appNavigator;
 
         /// <summary>
         /// 生成時処理
@@ -23,6 +27,8 @@ namespace Sample {
         /// </summary>
         private void Start() {
             var containerBuilder = new ContainerBuilder();
+            _appNavigator = new AppNavigator();
+            containerBuilder.RegisterInstance<IAppNavigator>(_appNavigator);
             _rootResolver = containerBuilder.Build();
 
             _navigationEngine = NavigationEngineBuilder.Create()
@@ -39,7 +45,7 @@ namespace Sample {
                         })
                         .AddSession(new BattleSessionNode(), battle => {
                             battle.AddScreen(new BattleHudScreenNode(), battleHud => {
-                                battleHud.AddScreen(new BattleDialogScreenNode());
+                                battleHud.AddScreen(new BattlePauseScreenNode());
                             });
                         });
                 })
@@ -56,7 +62,7 @@ namespace Sample {
                                         partyTop.SetFallback(homeTop);
                                     })
                                     .Connect(typeof(BattleHudScreenNode), battleHud => {
-                                        battleHud.Connect(typeof(BattleDialogScreenNode))
+                                        battleHud.Connect(typeof(BattlePauseScreenNode))
                                             .SetFallback();
                                     });
                             });
@@ -66,7 +72,10 @@ namespace Sample {
                 })
                 .Build(_rootResolver);
 
-            _navigationEngine.TransitionTo<TitleTopScreenNode>(null, new OutInTransition());
+            _appNavigator.Initialize(_navigationEngine);
+
+            var navigator = _rootResolver.Resolve<IAppNavigator>();
+            navigator.GoToTitle();
         }
 
         /// <summary>

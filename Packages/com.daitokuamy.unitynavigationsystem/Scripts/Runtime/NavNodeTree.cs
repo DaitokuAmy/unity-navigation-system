@@ -466,6 +466,28 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
+        /// 現在カレントなNodeの親に特定のNavNode型が存在するかチェック
+        /// </summary>
+        public bool CheckCurrentNodeParentType<TNode>()
+            where TNode : INavNode {
+            if (Current == null) {
+                return false;
+            }
+
+            var parentType = typeof(TNode);
+            var parent = Current.Parent;
+            while (parent != null) {
+                if (parent.GetType() == parentType) {
+                    return true;
+                }
+
+                parent = parent.Parent;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// NavNodeのプリロード
         /// </summary>
         public AsyncOperationHandle PreLoad(Type nodeType) {

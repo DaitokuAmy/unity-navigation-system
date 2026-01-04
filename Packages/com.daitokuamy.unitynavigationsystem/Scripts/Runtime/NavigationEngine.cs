@@ -42,8 +42,8 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// Routerの取得
         /// </summary>
-        public TRouter GetRouter<TRouter>() 
-            where TRouter : IStateRouter<Type, INavNode, NavNodeTree.TransitionOption>, class {
+        public TRouter GetRouter<TRouter>()
+            where TRouter : class, IStateRouter<Type, INavNode, NavNodeTree.TransitionOption> {
             return _router as TRouter;
         }
 
@@ -96,12 +96,24 @@ namespace UnityNavigationSystem {
         /// <param name="setupAction">遷移先初期化用関数</param>
         /// <param name="transition">遷移方法</param>
         /// <param name="effects">遷移時演出</param>
-        public TransitionHandle<INavNode> Back(int depth = 1, NavNodeTree.TransitionOption option = null, Action<INavNode> setupAction = null, ITransition transition = null, params ITransitionEffect[] effects) {
+        public TransitionHandle<INavNode> Back(int depth = 1, NavNodeTree.TransitionOption option = null, Action<INavNode> setupAction = null, ITransition transition = null,
+            params ITransitionEffect[] effects) {
             if (_router != null) {
                 return _router.Back(depth, option, setupAction, transition, effects);
             }
-            
+
             throw new NotSupportedException("null router is not supported.");
+        }
+
+        /// <summary>
+        /// 戻る処理
+        /// </summary>
+        /// <param name="depth">戻り階層数(1～)</param>
+        /// <param name="setupAction">遷移先初期化用関数</param>
+        /// <param name="transition">遷移方法</param>
+        /// <param name="effects">遷移時演出</param>
+        public TransitionHandle<INavNode> Back(int depth = 1, Action<INavNode> setupAction = null, ITransition transition = null, params ITransitionEffect[] effects) {
+            return Back(depth, null, setupAction, transition, effects);
         }
 
         /// <summary>
@@ -122,7 +134,7 @@ namespace UnityNavigationSystem {
         public TransitionHandle<INavNode> Back(ITransition transition = null, params ITransitionEffect[] effects) {
             return Back(1, null, null, transition, effects);
         }
-        
+
         /// <summary>
         /// 状態リセット
         /// </summary>
@@ -135,13 +147,21 @@ namespace UnityNavigationSystem {
 
             return _tree.Reset(setupAction, effects);
         }
-        
+
         /// <summary>
         /// 状態リセット
         /// </summary>
         /// <param name="effects">遷移時演出</param>
         public TransitionHandle<INavNode> Reset(params ITransitionEffect[] effects) {
             return Reset(null, effects);
+        }
+
+        /// <summary>
+        /// 現在カレントなNodeの親に特定のNavNode型が存在するかチェック
+        /// </summary>
+        public bool CheckCurrentNodeParentType<TNode>()
+            where TNode : INavNode {
+            return _tree.CheckCurrentNodeParentType<TNode>();
         }
     }
 }

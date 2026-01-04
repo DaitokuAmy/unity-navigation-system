@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityNavigationSystem;
 
-namespace Sample {
+namespace Sample.Lifecycle {
     /// <summary>
     /// シーン切り替えSessionNode基底
     /// </summary>

@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 namespace Sample {
     /// <summary>
-    /// バトルダイアログ用UI
+    /// バトルポーズ画面用UI
     /// </summary>
-    public sealed class BattleDialogUI : MonoBehaviour {
+    public sealed class BattlePauseUI : MonoBehaviour {
         public Button cancelButton;
         public Button decideButton;
     }

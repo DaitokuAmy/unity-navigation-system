@@ -1,4 +1,4 @@
-namespace Sample {
+namespace Sample.Lifecycle {
     /// <summary>
     /// ルートNode
     /// </summary>

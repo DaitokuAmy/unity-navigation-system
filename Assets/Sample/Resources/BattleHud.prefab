@@ -251,6 +251,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8129161606292002046}
   - component: {fileID: 2102754766673979638}
+  - component: {fileID: 2472377415808444630}
   m_Layer: 0
   m_Name: BattleHud
   m_TagString: Untagged
@@ -288,6 +289,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Sample.BattleHudUI
   fullScreenButton: {fileID: 3503550451673474337}
   backButton: {fileID: 1601145373909304002}
+--- !u!114 &2472377415808444630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070946023708927144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f225a204beff9b4ca0c2352b3256802, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sample.Presentation.BattleHudScreenPresenter
+  uiComponent: {fileID: 2102754766673979638}
 --- !u!1 &5901185973846174840
 GameObject:
   m_ObjectHideFlags: 0

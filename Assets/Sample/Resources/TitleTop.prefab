@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8129161606292002046}
   - component: {fileID: 8398527936195628497}
+  - component: {fileID: 5398317702251706347}
   m_Layer: 0
   m_Name: TitleTop
   m_TagString: Untagged
@@ -46,6 +47,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sample.TitleTopUI
   fullScreenButton: {fileID: 6829345462372893590}
+--- !u!114 &5398317702251706347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070946023708927144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f006b3ea8e91ea438286f30b2f07c3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sample.Presentation.TitleTopScreenPresenter
+  uiComponent: {fileID: 8398527936195628497}
 --- !u!1 &5901185973846174840
 GameObject:
   m_ObjectHideFlags: 0

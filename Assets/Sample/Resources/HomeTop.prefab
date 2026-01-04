@@ -266,6 +266,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8129161606292002046}
   - component: {fileID: 4719779181099092679}
+  - component: {fileID: 2641639374298210648}
   m_Layer: 0
   m_Name: HomeTop
   m_TagString: Untagged
@@ -302,6 +303,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sample.HomeTopUI
   battleButton: {fileID: 4205393348243040391}
+--- !u!114 &2641639374298210648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070946023708927144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 659e28464af1e32479420b5bdbade12a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sample.Presentation.HomeTopScreenPresenter
+  uiComponent: {fileID: 4719779181099092679}
 --- !u!1 &4511523708399684444
 GameObject:
   m_ObjectHideFlags: 0
