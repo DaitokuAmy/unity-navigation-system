@@ -7,7 +7,7 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// コルーチン本体
     /// </summary>
-    public class Coroutine : IEnumerator {
+    internal class Coroutine : IEnumerator {
         private readonly IEnumerator _enumerator;
         private readonly Stack<object> _stack;
         

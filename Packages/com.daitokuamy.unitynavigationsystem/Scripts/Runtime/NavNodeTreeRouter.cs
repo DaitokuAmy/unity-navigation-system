@@ -4,7 +4,7 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// NavNode遷移に使うツリー
     /// </summary>
-    public sealed class NavNodeTreeRouter : StateTreeRouter<Type, INavNode, NavNodeTree.TransitionOption> {
+    public sealed class NavNodeTreeRouter : StateTreeRouter<Type, INavNode, NavNodeTree.TransitionOption>, INavNodeStateRouter {
         /// <summary>
         /// コンストラクタ
         /// </summary>

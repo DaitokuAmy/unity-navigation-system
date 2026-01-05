@@ -8,7 +8,7 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// コルーチン実行クラス
     /// </summary>
-    public class CoroutineRunner : IDisposable {
+    internal class CoroutineRunner : IDisposable {
         /// <summary>
         /// コルーチン情報
         /// </summary>

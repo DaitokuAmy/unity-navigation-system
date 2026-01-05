@@ -7,7 +7,7 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// コルーチンの拡張
     /// </summary>
-    public static class CoroutineExtensions {
+    internal static class CoroutineExtensions {
         // WaitForSeconds.m_Seconds
         private static readonly FieldInfo WaitForSecondsAccessor = typeof(WaitForSeconds).GetField("m_Seconds",
             BindingFlags.Instance | BindingFlags.GetField | BindingFlags.NonPublic);

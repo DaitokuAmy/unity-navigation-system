@@ -6,7 +6,7 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// 並列実行用コルーチン
     /// </summary>
-    public class MergedCoroutine : IEnumerator {
+    internal class MergedCoroutine : IEnumerator {
         private readonly Coroutine[] _coroutines;
 
         /// <inheritdoc/>

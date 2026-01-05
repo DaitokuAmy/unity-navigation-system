@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using VContainer;
 
 namespace UnityNavigationSystem {
-    using NavNodeRouter = IStateRouter<Type, INavNode, NavNodeTree.TransitionOption>;
-    
     /// <summary>
     /// Node構築用のインターフェース
     /// </summary>
@@ -155,7 +153,7 @@ namespace UnityNavigationSystem {
     public sealed class NavigationEngineBuilder {
         
         private RootNodeBuilder _rootNodeBuilder;
-        private Func<NavNodeTree, NavNodeRouter> _createRouterFunc;
+        private Func<NavNodeTree, INavNodeStateRouter> _createRouterFunc;
         private Dictionary<Type, INavNode> _nodeMap = new();
 
         /// <summary>
@@ -189,7 +187,7 @@ namespace UnityNavigationSystem {
         /// Node遷移用のルーター設定
         /// </summary>
         /// <param name="createFunc">Routerの生成処理</param>
-        public NavigationEngineBuilder CreateRouter(Func<NavNodeTree, NavNodeRouter> createFunc) {
+        public NavigationEngineBuilder CreateRouter(Func<NavNodeTree, INavNodeStateRouter> createFunc) {
             _createRouterFunc = createFunc;
             return this;
         }

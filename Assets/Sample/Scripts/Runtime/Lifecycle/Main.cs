@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using Sample.Application;
 using Sample.UI;
 using UnityEngine;
@@ -31,7 +32,7 @@ namespace Sample.Lifecycle {
             containerBuilder.RegisterInstance<IAppNavigator>(appNavigator);
             containerBuilder.Register<ResidentUIService>(Lifetime.Singleton);
             _rootResolver = containerBuilder.Build();
-            
+
             // Inject
             _rootResolver.Inject(appNavigator);
 
@@ -56,7 +57,7 @@ namespace Sample.Lifecycle {
                 })
                 .CreateRouter(tree => {
                     var router = new NavNodeTreeRouter(tree);
-                    StateTreeRouterBuilder<Type, INavNode, NavNodeTree.TransitionOption>.Create()
+                    NavNodeTreeRouterBuilder.Create()
                         .AddRoot(typeof(TitleTopScreenNode), titleTop => {
                             titleTop.Connect(typeof(HomeTopScreenNode), homeTop => {
                                 homeTop.SetFallback(homeTop);
@@ -76,10 +77,10 @@ namespace Sample.Lifecycle {
                     return router;
                 })
                 .Build(_rootResolver);
-            
+
             // Navigator初期化
             appNavigator.Initialize(_navigationEngine);
-            
+
             // 常駐UI生成
             var request = Resources.LoadAsync<GameObject>("Resident");
             yield return request;

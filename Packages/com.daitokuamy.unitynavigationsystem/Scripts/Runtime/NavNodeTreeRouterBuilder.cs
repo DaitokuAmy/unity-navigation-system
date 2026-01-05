@@ -5,28 +5,26 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// StateTreeRouter用のBuilder
     /// </summary>
-    public sealed class StateTreeNodeBuilder<TKey, TState, TOption>
-        where TKey : class
-        where TState : class {
+    public sealed class NavNodeTreeNodeBuilder {
         /// <summary>
         /// Fallback情報
         /// </summary>
         private class FallbackInfo {
-            public TKey BaseNodeKey;
-            public StateTreeNodeBuilder<TKey, TState, TOption> BaseNodeBuilder;
+            public Type BaseNodeKey;
+            public NavNodeTreeNodeBuilder BaseNodeBuilder;
         }
 
-        private readonly StateTreeNodeBuilder<TKey, TState, TOption> _parent;
-        private readonly TKey _key;
-        private readonly List<StateTreeNodeBuilder<TKey, TState, TOption>> _children = new();
+        private readonly NavNodeTreeNodeBuilder _parent;
+        private readonly Type _key;
+        private readonly List<NavNodeTreeNodeBuilder> _children = new();
         private readonly List<FallbackInfo> _fallbackInfos = new();
 
-        private StateTreeNode<TKey> _node;
+        private StateTreeNode<Type> _node;
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        internal StateTreeNodeBuilder(TKey key, StateTreeNodeBuilder<TKey, TState, TOption> parent, Action<StateTreeNodeBuilder<TKey, TState, TOption>> buildAction) {
+        internal NavNodeTreeNodeBuilder(Type key, NavNodeTreeNodeBuilder parent, Action<NavNodeTreeNodeBuilder> buildAction) {
             _key = key;
             _parent = parent;
             buildAction?.Invoke(this);
@@ -37,8 +35,8 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="key">接続先Nodeを表すキー</param>
         /// <param name="buildAction">ネスト時に利用するアクション</param>
-        public StateTreeNodeBuilder<TKey, TState, TOption> Connect(TKey key, Action<StateTreeNodeBuilder<TKey, TState, TOption>> buildAction = null) {
-            var child = new StateTreeNodeBuilder<TKey, TState, TOption>(key, this, buildAction);
+        public NavNodeTreeNodeBuilder Connect(Type key, Action<NavNodeTreeNodeBuilder> buildAction = null) {
+            var child = new NavNodeTreeNodeBuilder(key, this, buildAction);
             _children.Add(child);
             return this;
         }
@@ -47,7 +45,7 @@ namespace UnityNavigationSystem {
         /// Fallbackの指定
         /// </summary>
         /// <param name="baseNodeKey">スコープを表すNodeKey(nullならグローバルスコープ)</param>
-        public StateTreeNodeBuilder<TKey, TState, TOption> SetFallback(TKey baseNodeKey = null) {
+        public NavNodeTreeNodeBuilder SetFallback(Type baseNodeKey = null) {
             _fallbackInfos.Add(new FallbackInfo { BaseNodeKey = baseNodeKey });
             return this;
         }
@@ -56,7 +54,7 @@ namespace UnityNavigationSystem {
         /// Fallbackの指定
         /// </summary>
         /// <param name="baseNodeBuilder">スコープを表すNodeBuilder</param>
-        public StateTreeNodeBuilder<TKey, TState, TOption> SetFallback(StateTreeNodeBuilder<TKey, TState, TOption> baseNodeBuilder) {
+        public NavNodeTreeNodeBuilder SetFallback(NavNodeTreeNodeBuilder baseNodeBuilder) {
             _fallbackInfos.Add(new FallbackInfo { BaseNodeBuilder = baseNodeBuilder });
             return this;
         }
@@ -64,7 +62,7 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// 構築処理
         /// </summary>
-        internal void Build(StateTreeRouter<TKey, TState, TOption> router) {
+        internal void Build(NavNodeTreeRouter router) {
             _node = router.ConnectRoot(_key);
 
             foreach (var fallbackInfo in _fallbackInfos) {
@@ -80,7 +78,7 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// 構築処理
         /// </summary>
-        internal void Build(StateTreeRouter<TKey, TState, TOption> router, StateTreeNode<TKey> parent) {
+        internal void Build(NavNodeTreeRouter router, StateTreeNode<Type> parent) {
             _node = parent.Connect(_key);
 
             foreach (var fallbackInfo in _fallbackInfos) {
@@ -96,7 +94,7 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// 親要素の生成済みNodeを再帰的に探す
         /// </summary>
-        private StateTreeNode<TKey> FindNodeInParent(TKey key) {
+        private StateTreeNode<Type> FindNodeInParent(Type key) {
             if (key == null) {
                 return null;
             }
@@ -117,29 +115,27 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// StateTreeRouterを構築するためのBuilder
     /// </summary>
-    public sealed class StateTreeRouterBuilder<TKey, TState, TOption>
-        where TKey : class
-        where TState : class {
-        private readonly List<StateTreeNodeBuilder<TKey, TState, TOption>> _rootBuilders = new();
+    public sealed class NavNodeTreeRouterBuilder {
+        private readonly List<NavNodeTreeNodeBuilder> _rootBuilders = new();
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        private StateTreeRouterBuilder() {
+        private NavNodeTreeRouterBuilder() {
         }
 
         /// <summary>
         /// Builderの生成
         /// </summary>
-        public static StateTreeRouterBuilder<TKey, TState, TOption> Create() {
-            return new StateTreeRouterBuilder<TKey, TState, TOption>();
+        public static NavNodeTreeRouterBuilder Create() {
+            return new NavNodeTreeRouterBuilder();
         }
 
         /// <summary>
         /// ルートの追加
         /// </summary>
-        public StateTreeRouterBuilder<TKey, TState, TOption> AddRoot(TKey key, Action<StateTreeNodeBuilder<TKey, TState, TOption>> buildAction = null) {
-            var builder = new StateTreeNodeBuilder<TKey, TState, TOption>(key, null, buildAction);
+        public NavNodeTreeRouterBuilder AddRoot(Type key, Action<NavNodeTreeNodeBuilder> buildAction = null) {
+            var builder = new NavNodeTreeNodeBuilder(key, null, buildAction);
             _rootBuilders.Add(builder);
             return this;
         }
@@ -147,7 +143,7 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// 構築処理
         /// </summary>
-        public StateTreeRouter<TKey, TState, TOption> Build(StateTreeRouter<TKey, TState, TOption> router) {
+        public NavNodeTreeRouter Build(NavNodeTreeRouter router) {
             foreach (var rootBuilder in _rootBuilders) {
                 rootBuilder.Build(router);
             }

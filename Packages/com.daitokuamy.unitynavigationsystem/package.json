@@ -4,9 +4,7 @@
     "version": "0.9.0",
     "unity": "6000.0",
     "license" : "MIT",
-    "dependencies": {
-        "jp.hadashikick.vcontainer": "1.17.0"
-    },
+    "dependencies": {},
     "author": {
         "name": "Hironori Ito",
         "url": "https://github.com/DaitokuAmy"
