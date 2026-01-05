@@ -31,3 +31,8 @@ Unityで画面遷移をコントロールするシステム
 ```
 バージョンを指定したい場合には以下のように記述します。  
 https://github.com/DaitokuAmy/unity-navigation-system.git?path=/Packages/com.daitokuamy.unitynavigationsystem#1.0.0
+
+#### 機能
+* NavigationEngine
+* NavigationBuilder
+* NavNode
