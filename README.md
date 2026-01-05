@@ -62,7 +62,7 @@ await handle;
 ```
 #### NavNodeTreeRouter
 ライフサイクル構造もツリーなのでややこしいですが、以下のような記述を加える事で明示的な遷移ツリーを定義する事ができます
-```
+```csharp
 _navigationEngine = NavigationEngineBuilder.Create()
     .CreateTree(new RootNode(), root => {
         /* 省略 */
@@ -92,6 +92,6 @@ _navigationEngine = NavigationEngineBuilder.Create()
     .Build(_rootResolver);
 ```
 この定義をしておくと、以下のようにBack関数が使えるようになり、戻り先のEngine解決が可能になります
-```
+```csharp
 _navigationEngine.Back(new OutInTransition(), new LoadingEffect());
 ```
