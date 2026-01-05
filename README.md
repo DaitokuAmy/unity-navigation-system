@@ -104,3 +104,38 @@ _navigationEngine = NavigationEngineBuilder.Create()
     .CreateRouter(tree => new NavNodeStackRouter(tree))
     .Build();
 ```
+#### NavNode
+基本的に、アプリ内で定義するNodeは以下のNodeを継承して作成します
+* **RootNode**
+  * 遷移に必ず1つ存在する常駐Node
+* **SessionNode**
+  * RootNodeにのみぶら下げる事が可能なNode、用途的にはシステム単位のライフサイクル単位で利用（開くアニメーションなどがない）
+* **ScreenNode**
+  * SessionNode or ScreenNodeにぶら下げる事が可能なNode、UIや画面単位で作成する事を想定（開く、閉じるアニメーションの記述が可能）
+
+具体的に、実際にNodeに記述可能なライフサイクルイベントは以下になります  
+* **Standby**
+  * エンジンによってNodeが追加された時に呼び出されます
+* **Load**
+  * PreLoadを含む、遷移時の読み込み処理が実行された時に呼び出されます
+  * 有効になるNodeを階層的に並列実行してLoadを呼び出します
+* **Initialize**
+  * 遷移時の読み込み処理が終わった後に呼び出されます
+* **PreOpen/Open/PostOpen** ※ScreenNodeのみ
+  * Initializeが終わった後に呼び出されます
+* **Activate**
+  * PreOpen/Open/PostOpenが終わった後に呼び出されます
+* **Deactivate**
+  * Activateの対
+  * 他Nodeに遷移された際、閉じるアニメーションの前に呼び出されます
+* **PreClose/Close/PostClose** ※ScreenNodeのみ
+  * Deactivateされた後に、閉じるアニメーション記述用として呼び出されます
+* **Terminate**
+  * Initializeの対
+  * 閉じるアニメーションの後に呼び出されます
+* **Unload**
+  * Loadの対
+  * Terminateの後に呼び出されますが、PreLoadされている場合は呼び出されません
+* **Release**
+  * Standbyの対
+  * エンジンからNodeが除外された時に呼び出されます
