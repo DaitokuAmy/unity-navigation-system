@@ -47,7 +47,7 @@ _navigationEngine = NavigationEngineBuilder.Create()
                 });
             });
     })
-    .Build(_rootResolver);
+    .Build();
 ```
 以下のようにそれぞれのNode間を遷移する事ができます
 ```csharp
@@ -89,9 +89,18 @@ _navigationEngine = NavigationEngineBuilder.Create()
             .Build(router);
         return router;
     })
-    .Build(_rootResolver);
+    .Build();
 ```
 この定義をしておくと、以下のようにBack関数が使えるようになり、戻り先のEngine解決が可能になります
 ```csharp
 _navigationEngine.Back(new OutInTransition(), new LoadingEffect());
+```
+ちなみに、以下のように記述する事でStack管理による戻り先コントロールも可能です
+```csharp
+_navigationEngine = NavigationEngineBuilder.Create()
+    .CreateTree(new RootNode(), root => {
+        /* 省略 */
+    })
+    .CreateRouter(tree => new NavNodeStackRouter(tree))
+    .Build();
 ```
