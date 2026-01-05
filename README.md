@@ -32,7 +32,66 @@ Unityで画面遷移をコントロールするシステム
 バージョンを指定したい場合には以下のように記述します。  
 https://github.com/DaitokuAmy/unity-navigation-system.git?path=/Packages/com.daitokuamy.unitynavigationsystem#1.0.0
 
-#### 機能
-* NavigationEngine
-* NavigationBuilder
-* NavNode
+## 機能説明
+#### NavigationEngine
+以下のように、NavigationEngineBuilderを使ってEngineを生成し...
+```csharp
+_navigationEngine = NavigationEngineBuilder.Create()
+    .CreateTree(new RootNode(), root => {
+        root.AddSession(new TitleSessionNode(), title => {
+                title.AddScreen(new TitleTopScreenNode());
+            })
+            .AddSession(new BattleSessionNode(), battle => {
+                battle.AddScreen(new BattleHudScreenNode(), battleHud => {
+                    battleHud.AddScreen(new BattlePauseScreenNode());
+                });
+            });
+    })
+    .Build(_rootResolver);
+```
+以下のようにそれぞれのNode間を遷移する事ができます
+```csharp
+var handle = _navigationEngine.TransitionTo<TitleTopScreenNode>(node => {
+        /* nodeにパラメータ渡したり出来る */
+    },
+    new OutInTransition(),
+    new LoadingEffect());
+
+// 遷移完了待ち
+await handle;
+```
+#### NavNodeTreeRouter
+ライフサイクル構造もツリーなのでややこしいですが、以下のような記述を加える事で明示的な遷移ツリーを定義する事ができます
+```
+_navigationEngine = NavigationEngineBuilder.Create()
+    .CreateTree(new RootNode(), root => {
+        /* 省略 */
+    })
+    .CreateRouter(tree => {
+        // ツリー構造で遷移図を構築
+        var router = new NavNodeTreeRouter(tree);
+        NavNodeTreeRouterBuilder.Create()
+            .AddRoot(typeof(TitleTopScreenNode), titleTop => {
+                titleTop.Connect(typeof(HomeTopScreenNode), homeTop => {
+                    homeTop.SetFallback(homeTop);
+                    homeTop.Connect(typeof(GachaTopScreenNode), gachaTop => {
+                            gachaTop.SetFallback(homeTop);
+                        })
+                        .Connect(typeof(PartyTopScreenNode), partyTop => {
+                            partyTop.SetFallback(homeTop);
+                        })
+                        .Connect(typeof(BattleHudScreenNode), battleHud => {
+                            battleHud.Connect(typeof(BattlePauseScreenNode))
+                                .SetFallback();
+                        });
+                });
+            })
+            .Build(router);
+        return router;
+    })
+    .Build(_rootResolver);
+```
+この定義をしておくと、以下のようにBack関数が使えるようになり、戻り先のEngine解決が可能になります
+```
+_navigationEngine.Back(new OutInTransition(), new LoadingEffect());
+```
