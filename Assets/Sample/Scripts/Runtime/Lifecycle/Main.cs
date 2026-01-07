@@ -60,16 +60,16 @@ namespace Sample.Lifecycle {
                     NavNodeTreeRouterBuilder.Create()
                         .AddRoot(typeof(TitleTopScreenNode), titleTop => {
                             titleTop.Connect(typeof(HomeTopScreenNode), homeTop => {
-                                homeTop.SetFallback(homeTop);
+                                homeTop.SetShortcutScope(homeTop);
                                 homeTop.Connect(typeof(GachaTopScreenNode), gachaTop => {
-                                        gachaTop.SetFallback(homeTop);
+                                        gachaTop.SetShortcutScope(homeTop);
                                     })
                                     .Connect(typeof(PartyTopScreenNode), partyTop => {
-                                        partyTop.SetFallback(homeTop);
+                                        partyTop.SetShortcutScope(homeTop);
                                     })
                                     .Connect(typeof(BattleHudScreenNode), battleHud => {
                                         battleHud.Connect(typeof(BattlePauseScreenNode))
-                                            .SetFallback();
+                                            .SetGlobalShortcut();
                                     });
                             });
                         })

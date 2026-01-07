@@ -7,9 +7,9 @@ namespace UnityNavigationSystem {
     /// </summary>
     public sealed class NavNodeTreeNodeBuilder {
         /// <summary>
-        /// Fallback情報
+        /// Shortcut情報
         /// </summary>
-        private class FallbackInfo {
+        private class ShortcutInfo {
             public Type BaseNodeKey;
             public NavNodeTreeNodeBuilder BaseNodeBuilder;
         }
@@ -17,7 +17,7 @@ namespace UnityNavigationSystem {
         private readonly NavNodeTreeNodeBuilder _parent;
         private readonly Type _key;
         private readonly List<NavNodeTreeNodeBuilder> _children = new();
-        private readonly List<FallbackInfo> _fallbackInfos = new();
+        private readonly List<ShortcutInfo> _shortcutInfos = new();
 
         private StateTreeNode<Type> _node;
 
@@ -42,20 +42,28 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
-        /// Fallbackの指定
+        /// Shortcutの指定
         /// </summary>
-        /// <param name="baseNodeKey">スコープを表すNodeKey(nullならグローバルスコープ)</param>
-        public NavNodeTreeNodeBuilder SetFallback(Type baseNodeKey = null) {
-            _fallbackInfos.Add(new FallbackInfo { BaseNodeKey = baseNodeKey });
+        /// <param name="baseNodeKey">スコープを表すNodeKey</param>
+        public NavNodeTreeNodeBuilder SetShortcutScope(Type baseNodeKey) {
+            _shortcutInfos.Add(new ShortcutInfo { BaseNodeKey = baseNodeKey });
             return this;
         }
 
         /// <summary>
-        /// Fallbackの指定
+        /// Shortcutの指定
         /// </summary>
         /// <param name="baseNodeBuilder">スコープを表すNodeBuilder</param>
-        public NavNodeTreeNodeBuilder SetFallback(NavNodeTreeNodeBuilder baseNodeBuilder) {
-            _fallbackInfos.Add(new FallbackInfo { BaseNodeBuilder = baseNodeBuilder });
+        public NavNodeTreeNodeBuilder SetShortcutScope(NavNodeTreeNodeBuilder baseNodeBuilder) {
+            _shortcutInfos.Add(new ShortcutInfo { BaseNodeBuilder = baseNodeBuilder });
+            return this;
+        }
+
+        /// <summary>
+        /// GlobalShortcutの指定
+        /// </summary>
+        public NavNodeTreeNodeBuilder SetGlobalShortcut() {
+            _shortcutInfos.Add(new ShortcutInfo { BaseNodeKey = null });
             return this;
         }
 
@@ -65,9 +73,9 @@ namespace UnityNavigationSystem {
         internal void Build(NavNodeTreeRouter router) {
             _node = router.ConnectRoot(_key);
 
-            foreach (var fallbackInfo in _fallbackInfos) {
-                var baseNode = fallbackInfo.BaseNodeBuilder?._node ?? FindNodeInParent(fallbackInfo.BaseNodeKey);
-                router.SetFallbackNode(_node, baseNode);
+            foreach (var info in _shortcutInfos) {
+                var baseNode = info.BaseNodeBuilder?._node ?? FindNodeInParent(info.BaseNodeKey);
+                router.SetShortcutNode(_node, baseNode);
             }
 
             foreach (var child in _children) {
@@ -81,9 +89,9 @@ namespace UnityNavigationSystem {
         internal void Build(NavNodeTreeRouter router, StateTreeNode<Type> parent) {
             _node = parent.Connect(_key);
 
-            foreach (var fallbackInfo in _fallbackInfos) {
-                var baseNode = fallbackInfo.BaseNodeBuilder?._node ?? FindNodeInParent(fallbackInfo.BaseNodeKey);
-                router.SetFallbackNode(_node, baseNode);
+            foreach (var info in _shortcutInfos) {
+                var baseNode = info.BaseNodeBuilder?._node ?? FindNodeInParent(info.BaseNodeKey);
+                router.SetShortcutNode(_node, baseNode);
             }
 
             foreach (var child in _children) {

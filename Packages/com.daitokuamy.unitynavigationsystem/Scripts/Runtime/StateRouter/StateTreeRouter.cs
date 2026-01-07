@@ -9,8 +9,8 @@ namespace UnityNavigationSystem {
     public class StateTreeRouter<TKey, TState, TOption> : IStateRouter<TKey, TState, TOption>
         where TState : class {
         private readonly IStateContainer<TKey, TState, TOption> _stateContainer;
-        private readonly Dictionary<TKey, StateTreeNode<TKey>> _globalFallbackNodes = new();
-        private readonly Dictionary<StateTreeNode<TKey>, Dictionary<TKey, StateTreeNode<TKey>>> _fallbackNodes = new();
+        private readonly Dictionary<TKey, StateTreeNode<TKey>> _globalShortcutNodes = new();
+        private readonly Dictionary<StateTreeNode<TKey>, Dictionary<TKey, StateTreeNode<TKey>>> _shortcutNodes = new();
 
         private bool _disposed;
         private StateTreeNode<TKey> _rootNode;
@@ -50,8 +50,8 @@ namespace UnityNavigationSystem {
                 _rootNode = null;
             }
 
-            _fallbackNodes.Clear();
-            _globalFallbackNodes.Clear();
+            _shortcutNodes.Clear();
+            _globalShortcutNodes.Clear();
         }
 
         /// <inheritdoc/>
@@ -116,7 +116,7 @@ namespace UnityNavigationSystem {
         /// <returns>接続したKeyを保持するNode</returns>
         public StateTreeNode<TKey> ConnectRoot(TKey key) {
             var node = _rootNode.Connect(key);
-            SetFallbackNode(node);
+            SetShortcutNode(node);
             return node;
         }
 
@@ -129,22 +129,22 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
-        /// FallbackNodeの設定
+        /// ShortcutNodeの設定
         /// </summary>
-        /// <param name="node">Fallback指定するノード</param>
-        /// <param name="baseNode">Fallback対象とするNodeの基点(nullだとグローバル)</param>
-        public void SetFallbackNode(StateTreeNode<TKey> node, StateTreeNode<TKey> baseNode = null) {
+        /// <param name="node">Shortcut指定するノード</param>
+        /// <param name="baseNode">Shortcut可能対象とするNodeの基点(nullだとグローバル)</param>
+        public void SetShortcutNode(StateTreeNode<TKey> node, StateTreeNode<TKey> baseNode = null) {
             if (node == null || !node.IsValid || node.IsRoot) {
                 return;
             }
 
             if (baseNode == null) {
-                _globalFallbackNodes[node.Key] = node;
+                _globalShortcutNodes[node.Key] = node;
             }
             else {
-                if (!_fallbackNodes.TryGetValue(baseNode, out var dict)) {
+                if (!_shortcutNodes.TryGetValue(baseNode, out var dict)) {
                     dict = new Dictionary<TKey, StateTreeNode<TKey>>();
-                    _fallbackNodes[baseNode] = dict;
+                    _shortcutNodes[baseNode] = dict;
                 }
 
                 dict[node.Key] = node;
@@ -152,38 +152,38 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
-        /// FallbackNodeのリセット
+        /// ShortcutNodeのリセット
         /// </summary>
-        public void ResetFallbackNode(TKey key) {
-            _globalFallbackNodes.Remove(key);
-            foreach (var dict in _fallbackNodes.Values) {
+        public void ResetShortcutNode(TKey key) {
+            _globalShortcutNodes.Remove(key);
+            foreach (var dict in _shortcutNodes.Values) {
                 dict.Remove(key);
             }
         }
 
         /// <summary>
-        /// FallbackNodeの設定全解除
+        /// ShortcutNodeの設定全解除
         /// </summary>
-        public void ResetFallbackNodes() {
-            _globalFallbackNodes.Clear();
-            _fallbackNodes.Clear();
+        public void ResetShortcutNodes() {
+            _globalShortcutNodes.Clear();
+            _shortcutNodes.Clear();
         }
 
         /// <summary>
         /// 次の接続先に存在するタイプかチェック
         /// </summary>
         /// <param name="key">接続先を表すキー</param>
-        /// <param name="includeFallback">fallbackに設定された物をチェックするか</param>
-        public bool CheckTransition(TKey key, bool includeFallback = true) {
+        /// <param name="includeShortcut">shortcutに設定された物をチェックするか</param>
+        public bool CheckTransition(TKey key, bool includeShortcut = true) {
             var nextNode = CurrentNode.TryGetNext(key);
             if (nextNode != null) {
                 return true;
             }
 
-            if (includeFallback) {
+            if (includeShortcut) {
                 var findRootNode = CurrentNode;
                 while (findRootNode != null) {
-                    if (_fallbackNodes.TryGetValue(findRootNode, out var dict)) {
+                    if (_shortcutNodes.TryGetValue(findRootNode, out var dict)) {
                         if (dict.TryGetValue(key, out _)) {
                             return true;
                         }
@@ -192,7 +192,7 @@ namespace UnityNavigationSystem {
                     findRootNode = findRootNode.GetPrevious();
                 }
 
-                if (_globalFallbackNodes.TryGetValue(key, out _)) {
+                if (_globalShortcutNodes.TryGetValue(key, out _)) {
                     return true;
                 }
             }
@@ -330,11 +330,11 @@ namespace UnityNavigationSystem {
                 nextNode = CurrentNode.TryGetNext(key);
             }
 
-            // 接続先がなければ、Fallback用のNodeを探す
+            // 接続先がなければ、Shortcut用のNodeを探す
             if (nextNode == null) {
                 var findRootNode = CurrentNode;
                 while (findRootNode != null) {
-                    if (_fallbackNodes.TryGetValue(findRootNode, out var dict)) {
+                    if (_shortcutNodes.TryGetValue(findRootNode, out var dict)) {
                         if (dict.TryGetValue(key, out nextNode)) {
                             break;
                         }
@@ -344,7 +344,7 @@ namespace UnityNavigationSystem {
                 }
 
                 if (nextNode == null) {
-                    _globalFallbackNodes.TryGetValue(key, out nextNode);
+                    _globalShortcutNodes.TryGetValue(key, out nextNode);
                 }
             }
 
