@@ -35,7 +35,7 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="buildAction">ネスト時に利用するアクション</param>
         public NavNodeTreeNodeBuilder Connect<TNodeType>(Action<NavNodeTreeNodeBuilder> buildAction = null)
-            where TNodeType : ScreenNode {
+            where TNodeType : IScreenNode {
             var child = new NavNodeTreeNodeBuilder(typeof(TNodeType), this, buildAction);
             _children.Add(child);
             return this;
@@ -143,7 +143,7 @@ namespace UnityNavigationSystem {
         /// ルートの追加
         /// </summary>
         public NavNodeTreeRouterBuilder AddRoot<TNodeType>(Action<NavNodeTreeNodeBuilder> buildAction = null)
-            where TNodeType : ScreenNode {
+            where TNodeType : IScreenNode {
             var builder = new NavNodeTreeNodeBuilder(typeof(TNodeType), null, buildAction);
             _rootBuilders.Add(builder);
             return this;

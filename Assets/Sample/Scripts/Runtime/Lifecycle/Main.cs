@@ -60,8 +60,8 @@ namespace Sample.Lifecycle {
                     NavNodeTreeRouterBuilder.Create()
                         .AddRoot<TitleTopScreenNode>(titleTop => {
                             titleTop.Connect<HomeTopScreenNode>(homeTop => {
-                                homeTop.SetShortcutScope(homeTop);
-                                homeTop.Connect<GachaTopScreenNode>(gachaTop => {
+                                homeTop.SetShortcutScope(homeTop)
+                                    .Connect<GachaTopScreenNode>(gachaTop => {
                                         gachaTop.SetShortcutScope(homeTop);
                                     })
                                     .Connect<PartyTopScreenNode>(partyTop => {
