@@ -170,11 +170,11 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
-        /// Nodeツリーの生成
+        /// ライフサイクルを表すツリー構造の生成
         /// </summary>
         /// <param name="rootNode">登録するRootNode</param>
         /// <param name="buildAction">子要素を登録するためのアクション</param>
-        public NavigationEngineBuilder CreateTree(IRootNode rootNode, Action<RootNodeBuilder> buildAction) {
+        public NavigationEngineBuilder CreateLifecycle(IRootNode rootNode, Action<RootNodeBuilder> buildAction) {
             if (_rootNodeBuilder != null) {
                 throw new InvalidOperationException("RootNode is already set.");
             }

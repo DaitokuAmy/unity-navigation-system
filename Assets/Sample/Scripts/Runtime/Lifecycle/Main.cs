@@ -38,7 +38,7 @@ namespace Sample.Lifecycle {
 
             // 遷移エンジン構築
             _navigationEngine = NavigationEngineBuilder.Create()
-                .CreateTree(new RootNode(), root => {
+                .CreateLifecycle(new RootNode(), root => {
                     root.AddSession(new TitleSessionNode(), title => {
                             title.AddScreen(new TitleTopScreenNode());
                         })
@@ -55,8 +55,8 @@ namespace Sample.Lifecycle {
                             });
                         });
                 })
-                .CreateRouter(tree => {
-                    var router = new NavNodeTreeRouter(tree);
+                .CreateRouter(container => {
+                    var router = new NavNodeTreeRouter(container);
                     NavNodeTreeRouterBuilder.Create()
                         .AddRoot<TitleTopScreenNode>(titleTop => {
                             titleTop.Connect<HomeTopScreenNode>(homeTop => {
