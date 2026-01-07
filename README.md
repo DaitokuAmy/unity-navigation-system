@@ -104,6 +104,10 @@ _navigationEngine = NavigationEngineBuilder.Create()
     .CreateRouter(tree => new NavNodeStackRouter(tree))
     .Build();
 ```
+また、各種Nodeのイベントが発生するタイミングを制御しやすいように、Engine側のUpdateはマニュアル制御する設計になっています
+```
+_navigationEngine.Update(); // ここで遷移のイベントが発火する
+```
 #### NavNode
 基本的に、アプリ内で定義するNodeは以下のNodeを継承して作成します
 * **[RootNode](https://github.com/DaitokuAmy/unity-navigation-system/blob/main/Packages/com.daitokuamy.unitynavigationsystem/Scripts/Runtime/Node/RootNode.cs)**
