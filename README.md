@@ -37,7 +37,7 @@ https://github.com/DaitokuAmy/unity-navigation-system.git?path=/Packages/com.dai
 以下のように、NavigationEngineBuilderを使ってEngineを生成し...
 ```csharp
 _navigationEngine = NavigationEngineBuilder.Create()
-    .CreateTree(new RootNode(), root => {
+    .CreateLifecycle(new RootNode(), root => {
         root.AddSession(new TitleSessionNode(), title => {
                 title.AddScreen(new TitleTopScreenNode());
             })
@@ -61,13 +61,13 @@ var handle = _navigationEngine.TransitionTo<TitleTopScreenNode>(node => {
 await handle;
 ```
 #### NavNodeTreeRouter
-ライフサイクル構造もツリーなのでややこしいですが、以下のような記述を加える事で明示的な遷移ツリーを定義する事ができます
+ライフサイクルもツリー構造なのでややこしいですが、以下のような記述を加える事で明示的な遷移ツリーを定義する事ができます
 ```csharp
 _navigationEngine = NavigationEngineBuilder.Create()
-    .CreateTree(new RootNode(), root => {
+    .CreateLifecycle(new RootNode(), root => {
         /* 省略 */
     })
-    .CreateRouter(tree => {
+    .CreateRouter(container => {
         // ツリー構造で遷移図を構築
         var router = new NavNodeTreeRouter(tree);
         NavNodeTreeRouterBuilder.Create()
@@ -98,7 +98,7 @@ _navigationEngine.Back(new OutInTransition(), new LoadingEffect());
 ちなみに、以下のように記述する事でStack管理による戻り先コントロールも可能です
 ```csharp
 _navigationEngine = NavigationEngineBuilder.Create()
-    .CreateTree(new RootNode(), root => {
+    .CreateLifecycle(new RootNode(), root => {
         /* 省略 */
     })
     .CreateRouter(tree => new NavNodeStackRouter(tree))
