@@ -3,6 +3,8 @@
     "rootNamespace": "",
     "references": [
         "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
+        "GUID:77221876cc6b8244180b96e320b1bcd4",
+        "GUID:afdd27b7f3b41e54492899bd43b876ed",
         "GUID:8e29f2d48e493424e987c2836b437a38",
         "GUID:cba4372860d4a7840927093209658980"
     ],

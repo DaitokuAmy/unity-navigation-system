@@ -1,4 +1,6 @@
+using R3;
 using Sample.UI;
+using UnityNavigationSystem;
 
 namespace Sample.Presentation {
     /// <summary>
@@ -7,20 +9,13 @@ namespace Sample.Presentation {
     public sealed class TitleTopScreenPresenter : ScreenPresenter {
         public TitleTopUI uiComponent;
 
-        /// <summary>
-        /// アクティブ時処理
-        /// </summary>
-        private void OnEnable() {
-            uiComponent.fullScreenButton.onClick.AddListener(() => {
-                AppNavigator.GoToHome();
-            });
-        }
-
-        /// <summary>
-        /// 非アクティブ時処理
-        /// </summary>
-        private void OnDisable() {
-            uiComponent.fullScreenButton.onClick.RemoveAllListeners();
+        /// <inheritdoc/>
+        protected override void Activate(IScope scope) {
+            uiComponent.fullScreenButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.GoToHome();
+                });
         }
     }
 }

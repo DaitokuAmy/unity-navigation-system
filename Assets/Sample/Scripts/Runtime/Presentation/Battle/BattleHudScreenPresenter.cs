@@ -1,4 +1,6 @@
+using R3;
 using Sample.UI;
+using UnityNavigationSystem;
 
 namespace Sample.Presentation {
     /// <summary>
@@ -7,24 +9,18 @@ namespace Sample.Presentation {
     public sealed class BattleHudScreenPresenter : ScreenPresenter {
         public BattleHudUI uiComponent;
 
-        /// <summary>
-        /// アクティブ時処理
-        /// </summary>
-        private void OnEnable() {
-            uiComponent.fullScreenButton.onClick.AddListener(() => {
-                AppNavigator.GoToBattlePause();
-            });
-            uiComponent.backButton.onClick.AddListener(() => {
-                AppNavigator.Back();
-            });
-        }
-
-        /// <summary>
-        /// 非アクティブ時処理
-        /// </summary>
-        private void OnDisable() {
-            uiComponent.fullScreenButton.onClick.RemoveAllListeners();
-            uiComponent.backButton.onClick.RemoveAllListeners();
+        /// <inheritdoc/>
+        protected override void Activate(IScope scope) {
+            uiComponent.fullScreenButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.GoToBattlePause();
+                });
+            uiComponent.backButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.Back();
+                });
         }
     }
 }

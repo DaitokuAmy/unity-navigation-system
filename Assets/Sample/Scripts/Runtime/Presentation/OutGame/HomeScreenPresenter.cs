@@ -1,4 +1,6 @@
+using R3;
 using Sample.UI;
+using UnityNavigationSystem;
 
 namespace Sample.Presentation {
     /// <summary>
@@ -7,32 +9,28 @@ namespace Sample.Presentation {
     public sealed class HomeScreenPresenter : ScreenPresenter {
         public HomeUI uiComponent;
 
-        /// <summary>
-        /// アクティブ時処理
-        /// </summary>
-        private void OnEnable() {
-            uiComponent.backButton.onClick.AddListener(() => {
-                AppNavigator.Back();
-            });
-            uiComponent.homeButton.onClick.AddListener(() => {
-                AppNavigator.GoToHome();
-            });
-            uiComponent.gachaButton.onClick.AddListener(() => {
-                AppNavigator.GoToGacha();
-            });
-            uiComponent.partyButton.onClick.AddListener(() => {
-                AppNavigator.GoToParty();
-            });
-        }
-
-        /// <summary>
-        /// 非アクティブ時処理
-        /// </summary>
-        private void OnDisable() {
-            uiComponent.backButton.onClick.RemoveAllListeners();
-            uiComponent.homeButton.onClick.RemoveAllListeners();
-            uiComponent.gachaButton.onClick.RemoveAllListeners();
-            uiComponent.partyButton.onClick.RemoveAllListeners();
+        /// <inheritdoc/>
+        protected override void Activate(IScope scope) {
+            uiComponent.backButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.Back();
+                });
+            uiComponent.homeButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.GoToHome();
+                });
+            uiComponent.gachaButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.GoToGacha();
+                });
+            uiComponent.partyButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.GoToParty();
+                });
         }
     }
 }
