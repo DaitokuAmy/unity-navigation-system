@@ -71,17 +71,17 @@ _navigationEngine = NavigationEngineBuilder.Create()
         // ツリー構造で遷移図を構築
         var router = new NavNodeTreeRouter(tree);
         NavNodeTreeRouterBuilder.Create()
-            .AddRoot(typeof(TitleTopScreenNode), titleTop => {
-                titleTop.Connect(typeof(HomeTopScreenNode), homeTop => {
+            .AddRoot<TitleTopScreenNode>(titleTop => {
+                titleTop.Connect<HomeTopScreenNode>(homeTop => {
                     homeTop.SetShortcutScope(homeTop);
-                    homeTop.Connect(typeof(GachaTopScreenNode), gachaTop => {
+                    homeTop.Connect<GachaTopScreenNode>(gachaTop => {
                             gachaTop.SetShortcutScope(homeTop);
                         })
-                        .Connect(typeof(PartyTopScreenNode), partyTop => {
+                        .Connect<PartyTopScreenNode>(partyTop => {
                             partyTop.SetShortcutScope(homeTop);
                         })
-                        .Connect(typeof(BattleHudScreenNode), battleHud => {
-                            battleHud.Connect(typeof(BattlePauseScreenNode))
+                        .Connect<BattleHudScreenNode>(battleHud => {
+                            battleHud.Connect<BattlePauseScreenNode>()
                                 .SetGlobalShortcut();
                         });
                 });
