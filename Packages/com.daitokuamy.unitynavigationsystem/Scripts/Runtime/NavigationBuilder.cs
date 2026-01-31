@@ -160,9 +160,10 @@ namespace UnityNavigationSystem {
     /// NavigationEngineのBuilder
     /// </summary>
     public sealed class NavigationEngineBuilder {
+        private readonly Dictionary<int, INavNode> _nodeMap = new();
+        
         private RootNodeBuilder _rootNodeBuilder;
         private Func<NavNodeTree, INavNodeStateRouter> _createRouterFunc;
-        private Dictionary<int, INavNode> _nodeMap = new();
 
         /// <summary>
         /// コンストラクタ

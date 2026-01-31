@@ -151,7 +151,8 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// 構築処理
         /// </summary>
-        public NavNodeTreeRouter Build(NavNodeTreeRouter router) {
+        public NavNodeTreeRouter Build(NavNodeTree lifecycle) {
+            var router = new NavNodeTreeRouter(lifecycle);
             foreach (var rootBuilder in _rootBuilders) {
                 rootBuilder.Build(router);
             }

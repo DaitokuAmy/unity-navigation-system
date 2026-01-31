@@ -46,7 +46,7 @@ namespace UnityNavigationSystem {
         /// Routerの取得
         /// </summary>
         public TRouter GetRouter<TRouter>()
-            where TRouter : class, IStateRouter<Type, INavNode, NavNodeTree.TransitionOption> {
+            where TRouter : class, IStateRouter<int, INavNode, NavNodeTree.TransitionOption> {
             return _router as TRouter;
         }
 
@@ -183,6 +183,15 @@ namespace UnityNavigationSystem {
         public TNode GetNodeInParent<TNode>()
             where TNode : INavNode {
             return _tree.GetNodeInParent<TNode>();
+        }
+
+        /// <summary>
+        /// 特定Nodeの階層の中で特定の型のNodeを取得
+        /// ※指定Nodeもチェック対象
+        /// </summary>
+        public TNode GetNodeInParent<TNode>(int targetNodeId)
+            where TNode : INavNode {
+            return _tree.GetNodeInParent<TNode>(targetNodeId);
         }
 
         /// <summary>

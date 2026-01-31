@@ -111,8 +111,7 @@ namespace Sample.Lifecycle {
                         });
                 })
                 .CreateRouter(container => {
-                    var router = new NavNodeTreeRouter(container);
-                    NavNodeTreeRouterBuilder.Create()
+                    return NavNodeTreeRouterBuilder.Create()
                         .AddRoot(Id.TitleTop, titleTop => {
                             titleTop.Connect(Id.HomeTop, homeTop => {
                                 homeTop.SetShortcutScope(homeTop)
@@ -131,8 +130,7 @@ namespace Sample.Lifecycle {
                                     });
                             });
                         })
-                        .Build(router);
-                    return router;
+                        .Build(container);
                 })
                 .Build(rootResolver);
         }
