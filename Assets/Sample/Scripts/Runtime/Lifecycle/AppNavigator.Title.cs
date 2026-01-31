@@ -8,7 +8,7 @@ namespace Sample.Lifecycle {
         /// <inheritdoc/>
         void IAppNavigator.GoToTitle() {
             var (transition, transitionEffects) = GetDefaultTransitionInfo<OutGameSessionNode>();
-            _engine.TransitionTo<TitleTopScreenNode>(null, transition, transitionEffects);
+            _engine.TransitionTo(Id.TitleTop, null, transition, transitionEffects);
         }
     }
 }

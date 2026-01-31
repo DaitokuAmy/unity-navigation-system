@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Threading.Tasks;
 using Sample.Application;
 using Sample.UI;
 using UnityEngine;
@@ -13,7 +11,7 @@ namespace Sample.Lifecycle {
     /// </summary>
     public class Main : MonoBehaviour {
         private IObjectResolver _rootResolver;
-        private NavigationEngine _navigationEngine;
+        private AppNavigator _appNavigator;
 
         /// <summary>
         /// 生成時処理
@@ -28,58 +26,16 @@ namespace Sample.Lifecycle {
         private IEnumerator Start() {
             // DIのRootContainer構築
             var containerBuilder = new ContainerBuilder();
-            var appNavigator = new AppNavigator();
-            containerBuilder.RegisterInstance<IAppNavigator>(appNavigator);
+            _appNavigator = new AppNavigator();
+            containerBuilder.RegisterInstance<IAppNavigator>(_appNavigator);
             containerBuilder.Register<ResidentUIService>(Lifetime.Singleton);
             _rootResolver = containerBuilder.Build();
 
             // Inject
-            _rootResolver.Inject(appNavigator);
-
-            // 遷移エンジン構築
-            _navigationEngine = NavigationEngineBuilder.Create()
-                .CreateLifecycle(new RootNode(), root => {
-                    root.AddSession(new TitleSessionNode(), title => {
-                            title.AddScreen(new TitleTopScreenNode());
-                        })
-                        .AddSession(new OutGameSessionNode(), outGame => {
-                            outGame.AddScreen(new HomeScreenNode(), home => {
-                                home.AddScreen(new HomeTopScreenNode())
-                                    .AddScreen(new GachaTopScreenNode())
-                                    .AddScreen(new PartyTopScreenNode());
-                            });
-                        })
-                        .AddSession(new BattleSessionNode(), battle => {
-                            battle.AddScreen(new BattleHudScreenNode(), battleHud => {
-                                battleHud.AddScreen(new BattlePauseScreenNode());
-                            });
-                        });
-                })
-                .CreateRouter(container => {
-                    var router = new NavNodeTreeRouter(container);
-                    NavNodeTreeRouterBuilder.Create()
-                        .AddRoot<TitleTopScreenNode>(titleTop => {
-                            titleTop.Connect<HomeTopScreenNode>(homeTop => {
-                                homeTop.SetShortcutScope(homeTop)
-                                    .Connect<GachaTopScreenNode>(gachaTop => {
-                                        gachaTop.SetShortcutScope(homeTop);
-                                    })
-                                    .Connect<PartyTopScreenNode>(partyTop => {
-                                        partyTop.SetShortcutScope(homeTop);
-                                    })
-                                    .Connect<BattleHudScreenNode>(battleHud => {
-                                        battleHud.Connect<BattlePauseScreenNode>()
-                                            .SetGlobalShortcut();
-                                    });
-                            });
-                        })
-                        .Build(router);
-                    return router;
-                })
-                .Build(_rootResolver);
+            _rootResolver.Inject(_appNavigator);
 
             // Navigator初期化
-            appNavigator.Initialize(_navigationEngine);
+            _appNavigator.Initialize(_rootResolver);
 
             // 常駐UI生成
             var request = Resources.LoadAsync<GameObject>("Resident");
@@ -98,14 +54,14 @@ namespace Sample.Lifecycle {
         /// 更新処理
         /// </summary>
         private void Update() {
-            _navigationEngine?.Update();
+            _appNavigator?.Update();
         }
 
         /// <summary>
         /// 廃棄時処理
         /// </summary>
         private void OnDestroy() {
-            _navigationEngine?.Dispose();
+            _appNavigator?.Dispose();
             _rootResolver?.Dispose();
         }
     }

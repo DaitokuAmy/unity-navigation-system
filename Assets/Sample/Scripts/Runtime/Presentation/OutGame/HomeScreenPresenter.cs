@@ -31,6 +31,11 @@ namespace Sample.Presentation {
                 .Subscribe(_ => {
                     AppNavigator.GoToParty();
                 });
+            uiComponent.shopButton.OnClickAsObservable()
+                .TakeUntil(scope)
+                .Subscribe(_ => {
+                    AppNavigator.GoToShop();
+                });
         }
     }
 }

@@ -10,5 +10,6 @@ namespace Sample.UI {
         public Button homeButton;
         public Button gachaButton;
         public Button partyButton;
+        public Button shopButton;
     }
 }

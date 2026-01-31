@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using VContainer;
 
 namespace UnityNavigationSystem {
@@ -8,8 +9,12 @@ namespace UnityNavigationSystem {
     public interface INavNode {
         /// <summary>Loadを並列で実行可能か</summary>
         bool IsParallelLoading { get; }
+        /// <summary>識別Id</summary>
+        int NodeId { get; }
         /// <summary>接続されている親</summary>
         INavNode Parent { get; }
+        /// <summary>接続している子のリスト</summary>
+        IReadOnlyList<INavNode> Children { get; }
         /// <summary>VContainer用のResolver</summary>
         IObjectResolver ObjectResolver { get; }
 
@@ -27,11 +32,12 @@ namespace UnityNavigationSystem {
         ITransition OverrideTransition(INavNode nextNode, ITransition transition);
         
         /// <summary>
-        /// 親の設定
+        /// セットアップ処理
         /// </summary>
+        /// <param name="nodeId">識別Id</param>
         /// <param name="parent">親要素にあたるNode</param>
         /// <param name="parentObjectResolver">VContainer用の親Resolver</param>
-        void SetParent(INavNode parent, IObjectResolver parentObjectResolver);
+        void Setup(int nodeId, INavNode parent, IObjectResolver parentObjectResolver);
         
         /// <summary>
         /// スタンバイ処理

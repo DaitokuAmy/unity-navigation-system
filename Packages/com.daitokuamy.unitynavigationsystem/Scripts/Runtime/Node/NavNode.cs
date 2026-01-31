@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using VContainer;
 
 namespace UnityNavigationSystem {
@@ -6,16 +7,23 @@ namespace UnityNavigationSystem {
     /// NavNode基底
     /// </summary>
     public abstract class NavNode : INavNode {
+        private readonly List<INavNode> _children = new();
+        
         private DisposableScope _standbyScope = new();
         private DisposableScope _loadScope = new();
         private DisposableScope _initializeScope = new();
         private DisposableScope _activateScope = new();
+        private int _nodeId;
         private INavNode _parent;
 
         /// <inheritdoc/>
         bool INavNode.IsParallelLoading => IsParallelLoading;
         /// <inheritdoc/>
+        int INavNode.NodeId => _nodeId;
+        /// <inheritdoc/>
         INavNode INavNode.Parent => _parent;
+        /// <inheritdoc/>
+        IReadOnlyList<INavNode> INavNode.Children => _children;
 
         /// <summary>Loadを並列で実行可能か</summary>
         protected virtual bool IsParallelLoading => true;
@@ -37,8 +45,18 @@ namespace UnityNavigationSystem {
         }
 
         /// <inheritdoc/>
-        void INavNode.SetParent(INavNode parent, IObjectResolver parentObjectResolver) {
+        void INavNode.Setup(int nodeId, INavNode parent, IObjectResolver parentObjectResolver) {
+            _nodeId = nodeId;
+            
+            if (_parent is NavNode prevParentNode) {
+                prevParentNode._children.Remove(this);
+            }
+
             _parent = parent;
+            if (_parent is NavNode parentNode) {
+                parentNode._children.Add(this);
+            }
+
             if (parentObjectResolver != null) {
                 ObjectResolver = parentObjectResolver.CreateScope(Configure);
             }

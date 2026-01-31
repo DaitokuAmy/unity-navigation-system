@@ -17,5 +17,10 @@ namespace Sample.Application {
         /// パーティ画面への遷移
         /// </summary>
         void GoToParty();
+
+        /// <summary>
+        /// ショップ画面への遷移
+        /// </summary>
+        void GoToShop();
     }
 }

@@ -15,20 +15,22 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="parentNode">登録親のNode</param>
         /// <param name="nodeMap">KeyValue登録用の辞書</param>
-        void Build(INavNode parentNode, Dictionary<Type, INavNode> nodeMap);
+        void Build(INavNode parentNode, Dictionary<int, INavNode> nodeMap);
     }
 
     /// <summary>
     /// RootNode用のBuilder
     /// </summary>
     public sealed class RootNodeBuilder {
+        private readonly int _nodeId;
         private readonly IRootNode _rootNode;
         private readonly List<INavNodeBuilder> _childBuilders = new();
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        internal RootNodeBuilder(IRootNode rootNode, Action<RootNodeBuilder> buildAction = null) {
+        internal RootNodeBuilder(int nodeId, IRootNode rootNode, Action<RootNodeBuilder> buildAction = null) {
+            _nodeId = nodeId;
             _rootNode = rootNode;
             buildAction?.Invoke(this);
         }
@@ -36,10 +38,11 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// SessionNodeの追加
         /// </summary>
-        /// <param name="sessionNode">追加対象のNode</param>
+        /// <param name="nodeId">登録するNode識別用Id</param>
         /// <param name="buildAction">子要素を追加するためのアクション</param>
-        public RootNodeBuilder AddSession(ISessionNode sessionNode, Action<SessionNodeBuilder> buildAction = null) {
-            var child = new SessionNodeBuilder(sessionNode, buildAction);
+        public RootNodeBuilder AddSession<TNode>(int nodeId, Action<SessionNodeBuilder> buildAction = null)
+            where TNode : ISessionNode, new() {
+            var child = new SessionNodeBuilder(nodeId, new TNode(), buildAction);
             _childBuilders.Add(child);
             return this;
         }
@@ -49,12 +52,12 @@ namespace UnityNavigationSystem {
         /// </summary>
         /// <param name="nodeMap">KeyValue登録用の辞書</param>
         /// <param name="parentObjectResolver">親として設定するVContainerのResolver</param>
-        internal IRootNode Build(Dictionary<Type, INavNode> nodeMap, IObjectResolver parentObjectResolver) {
-            if (!nodeMap.TryAdd(_rootNode.GetType(), _rootNode)) {
-                throw new InvalidOperationException($"Node type {_rootNode.GetType()} is already registered.");
+        internal IRootNode Build(Dictionary<int, INavNode> nodeMap, IObjectResolver parentObjectResolver) {
+            if (!nodeMap.TryAdd(_nodeId, _rootNode)) {
+                throw new InvalidOperationException($"Node id <{_nodeId}:{_rootNode.GetType()}> is already registered.");
             }
 
-            _rootNode.SetParent(null, parentObjectResolver);
+            _rootNode.Setup(_nodeId, null, parentObjectResolver);
             foreach (var child in _childBuilders) {
                 child.Build(_rootNode, nodeMap);
             }
@@ -67,6 +70,7 @@ namespace UnityNavigationSystem {
     /// SessionNode用のBuilder
     /// </summary>
     public sealed class SessionNodeBuilder : INavNodeBuilder {
+        private readonly int _nodeId;
         private readonly ISessionNode _sessionNode;
         private readonly List<INavNodeBuilder> _childBuilders = new();
 
@@ -76,18 +80,19 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        internal SessionNodeBuilder(ISessionNode sessionNode, Action<SessionNodeBuilder> buildAction = null) {
+        internal SessionNodeBuilder(int nodeId, ISessionNode sessionNode, Action<SessionNodeBuilder> buildAction = null) {
+            _nodeId = nodeId;
             _sessionNode = sessionNode;
             buildAction?.Invoke(this);
         }
 
         /// <inheritdoc/>
-        void INavNodeBuilder.Build(INavNode parentNode, Dictionary<Type, INavNode> nodeMap) {
-            if (!nodeMap.TryAdd(_sessionNode.GetType(), _sessionNode)) {
-                throw new InvalidOperationException($"Node type {_sessionNode.GetType()} is already registered.");
+        void INavNodeBuilder.Build(INavNode parentNode, Dictionary<int, INavNode> nodeMap) {
+            if (!nodeMap.TryAdd(_nodeId, _sessionNode)) {
+                throw new InvalidOperationException($"Node id <{_nodeId}:{_sessionNode.GetType()}> is already registered.");
             }
 
-            _sessionNode.SetParent(parentNode, parentNode.ObjectResolver);
+            _sessionNode.Setup(_nodeId, parentNode, parentNode.ObjectResolver);
             foreach (var child in _childBuilders) {
                 child.Build(_sessionNode, nodeMap);
             }
@@ -96,10 +101,11 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// ScreenNodeの追加
         /// </summary>
-        /// <param name="screenNode">追加対象のNode</param>
+        /// <param name="nodeId">登録するNode識別用Id</param>
         /// <param name="buildAction">子要素を追加するためのアクション</param>
-        public SessionNodeBuilder AddScreen(IScreenNode screenNode, Action<ScreenNodeBuilder> buildAction = null) {
-            var child = new ScreenNodeBuilder(screenNode, buildAction);
+        public SessionNodeBuilder AddScreen<TNode>(int nodeId, Action<ScreenNodeBuilder> buildAction = null)
+            where TNode : IScreenNode, new() {
+            var child = new ScreenNodeBuilder(nodeId, new TNode(), buildAction);
             _childBuilders.Add(child);
             return this;
         }
@@ -109,6 +115,7 @@ namespace UnityNavigationSystem {
     /// ScreenNode用のBuilder
     /// </summary>
     public sealed class ScreenNodeBuilder : INavNodeBuilder {
+        private readonly int _nodeId;
         private readonly IScreenNode _screenNode;
         private readonly List<INavNodeBuilder> _childBuilders = new();
 
@@ -118,18 +125,19 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        internal ScreenNodeBuilder(IScreenNode screenNode, Action<ScreenNodeBuilder> buildAction = null) {
+        internal ScreenNodeBuilder(int nodeId, IScreenNode screenNode, Action<ScreenNodeBuilder> buildAction = null) {
+            _nodeId = nodeId;
             _screenNode = screenNode;
             buildAction?.Invoke(this);
         }
 
         /// <inheritdoc/>
-        void INavNodeBuilder.Build(INavNode parentNode, Dictionary<Type, INavNode> nodeMap) {
-            if (!nodeMap.TryAdd(_screenNode.GetType(), _screenNode)) {
-                throw new InvalidOperationException($"Node type {_screenNode.GetType()} is already registered.");
+        void INavNodeBuilder.Build(INavNode parentNode, Dictionary<int, INavNode> nodeMap) {
+            if (!nodeMap.TryAdd(_nodeId, _screenNode)) {
+                throw new InvalidOperationException($"Node id <{_nodeId}:{_screenNode.GetType()}> is already registered.");
             }
 
-            _screenNode.SetParent(parentNode, parentNode.ObjectResolver);
+            _screenNode.Setup(_nodeId, parentNode, parentNode.ObjectResolver);
             foreach (var child in _childBuilders) {
                 child.Build(_screenNode, nodeMap);
             }
@@ -138,10 +146,11 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// ScreenNodeの追加
         /// </summary>
-        /// <param name="screenNode">追加対象のNode</param>
+        /// <param name="nodeId">登録するNode識別用Id</param>
         /// <param name="buildAction">子要素を追加するためのアクション</param>
-        public ScreenNodeBuilder AddScreen(IScreenNode screenNode, Action<ScreenNodeBuilder> buildAction = null) {
-            var child = new ScreenNodeBuilder(screenNode, buildAction);
+        public ScreenNodeBuilder AddScreen<TNode>(int nodeId, Action<ScreenNodeBuilder> buildAction = null)
+            where TNode : IScreenNode, new() {
+            var child = new ScreenNodeBuilder(nodeId, new TNode(), buildAction);
             _childBuilders.Add(child);
             return this;
         }
@@ -151,10 +160,9 @@ namespace UnityNavigationSystem {
     /// NavigationEngineのBuilder
     /// </summary>
     public sealed class NavigationEngineBuilder {
-        
         private RootNodeBuilder _rootNodeBuilder;
         private Func<NavNodeTree, INavNodeStateRouter> _createRouterFunc;
-        private Dictionary<Type, INavNode> _nodeMap = new();
+        private Dictionary<int, INavNode> _nodeMap = new();
 
         /// <summary>
         /// コンストラクタ
@@ -172,14 +180,15 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// ライフサイクルを表すツリー構造の生成
         /// </summary>
-        /// <param name="rootNode">登録するRootNode</param>
+        /// <param name="nodeId">登録するNode識別用Id</param>
         /// <param name="buildAction">子要素を登録するためのアクション</param>
-        public NavigationEngineBuilder CreateLifecycle(IRootNode rootNode, Action<RootNodeBuilder> buildAction) {
+        public NavigationEngineBuilder CreateLifecycle<TNode>(int nodeId, Action<RootNodeBuilder> buildAction)
+            where TNode : IRootNode, new() {
             if (_rootNodeBuilder != null) {
                 throw new InvalidOperationException("RootNode is already set.");
             }
 
-            _rootNodeBuilder = new RootNodeBuilder(rootNode, buildAction);
+            _rootNodeBuilder = new RootNodeBuilder(nodeId, new TNode(), buildAction);
             return this;
         }
 

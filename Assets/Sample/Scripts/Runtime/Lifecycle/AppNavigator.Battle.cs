@@ -8,13 +8,13 @@ namespace Sample.Lifecycle {
         /// <inheritdoc/>
         void IAppNavigator.GoToBattle() {
             var (transition, transitionEffects) = GetDefaultTransitionInfo<BattleSessionNode>();
-            _engine.TransitionTo<BattleHudScreenNode>(null, transition, transitionEffects);
+            _engine.TransitionTo(Id.BattleHud, null, transition, transitionEffects);
         }
 
         /// <inheritdoc/>
         void IAppNavigator.GoToBattlePause() {
             var (transition, transitionEffects) = GetDefaultTransitionInfo<BattleSessionNode>();
-            _engine.TransitionTo<BattlePauseScreenNode>(null, transition, transitionEffects);
+            _engine.TransitionTo(Id.BattlePause, null, transition, transitionEffects);
         }
     }
 }

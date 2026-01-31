@@ -8,13 +8,22 @@ namespace UnityNavigationSystem {
     /// <summary>
     /// NavNode構造を管理するツリー
     /// </summary>
-    public sealed class NavNodeTree : ITransitionResolver, IStateContainer<Type, INavNode, NavNodeTree.TransitionOption> {
+    public sealed class NavNodeTree : ITransitionResolver, IStateContainer<int, INavNode, NavNodeTree.TransitionOption> {
         /// <summary>
         /// 遷移オプション
         /// </summary>
-        public class TransitionOption {
+        public readonly struct TransitionOption {
+            public static readonly TransitionOption Default = new(false);
+            
             /// <summary>Rootから再構築して遷移するか</summary>
-            public bool Refresh = false;
+            public readonly bool Refresh;
+            
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            public TransitionOption(bool refresh) {
+                Refresh = refresh;
+            }
         }
 
         /// <summary>
@@ -70,12 +79,13 @@ namespace UnityNavigationSystem {
             public INavNode Node;
             public PreLoadState State;
             public AsyncOperator AsyncOperator;
+            public int ReferenceCount;
         }
 
         private readonly IRootNode _rootNode;
-        private readonly IReadOnlyDictionary<Type, INavNode> _nodeMap;
+        private readonly IReadOnlyDictionary<int, INavNode> _nodeMap;
         private readonly List<INavNode> _runningNodes = new();
-        private readonly Dictionary<Type, PreLoadInfo> _preLoadInfos = new();
+        private readonly Dictionary<INavNode, PreLoadInfo> _preLoadInfos = new();
 
         private TransitionInfo _transitionInfo;
         private CoroutineRunner _coroutineRunner;
@@ -91,7 +101,7 @@ namespace UnityNavigationSystem {
         /// <param name="rootNode">ルートとして登録するノード</param>
         /// <param name="nodeMap">RootNode以下に登録されているNodeのマッピング情報</param>
         /// <param name="engine">Navigation制御用エンジン</param>
-        public NavNodeTree(IRootNode rootNode, IReadOnlyDictionary<Type, INavNode> nodeMap, NavigationEngine engine) {
+        public NavNodeTree(IRootNode rootNode, IReadOnlyDictionary<int, INavNode> nodeMap, NavigationEngine engine) {
             _coroutineRunner = new();
             _rootNode = rootNode;
             _nodeMap = nodeMap;
@@ -131,12 +141,12 @@ namespace UnityNavigationSystem {
 
 
         /// <inheritdoc/>
-        INavNode IStateContainer<Type, INavNode, TransitionOption>.FindState(Type key) {
+        INavNode IStateContainer<int, INavNode, TransitionOption>.FindState(int key) {
             return _nodeMap.GetValueOrDefault(key);
         }
 
         /// <inheritdoc/>
-        Type[] IStateContainer<Type, INavNode, TransitionOption>.GetStateKeys() {
+        int[] IStateContainer<int, INavNode, TransitionOption>.GetStateKeys() {
             return _nodeMap.Keys.ToArray();
         }
 
@@ -180,7 +190,7 @@ namespace UnityNavigationSystem {
             for (var i = 0; i < _transitionInfo.NextNodes.Count; i++) {
                 var node = _transitionInfo.NextNodes[i];
                 // PreLoad対象はSkip
-                if (_preLoadInfos.TryGetValue(node.GetType(), out var preLoadInfo)) {
+                if (_preLoadInfos.TryGetValue(node, out var preLoadInfo)) {
                     if (preLoadInfo.State == PreLoadState.PreLoading) {
                         preLoadingInfos.Add(preLoadInfo);
                     }
@@ -298,7 +308,7 @@ namespace UnityNavigationSystem {
             for (var i = 0; i < _transitionInfo.PrevNodes.Count; i++) {
                 var node = _transitionInfo.PrevNodes[i];
                 // PreLoad対象はSkip
-                if (_preLoadInfos.TryGetValue(node.GetType(), out _)) {
+                if (_preLoadInfos.TryGetValue(node, out _)) {
                     continue;
                 }
 
@@ -328,13 +338,13 @@ namespace UnityNavigationSystem {
         }
 
         /// <inheritdoc/>
-        public TransitionHandle<INavNode> TransitionTo(Type nodeType, TransitionOption option, bool back, Action<INavNode> setupAction, ITransition transition, params ITransitionEffect[] effects) {
+        public TransitionHandle<INavNode> TransitionTo(int nodeId, TransitionOption option, bool back, Action<INavNode> setupAction, ITransition transition, params ITransitionEffect[] effects) {
             if (IsTransitioning) {
                 throw new Exception("In transitioning");
             }
 
-            if (!_nodeMap.TryGetValue(nodeType, out var nextNode)) {
-                throw new KeyNotFoundException($"Not found nodeType:{nodeType.Name}");
+            if (!_nodeMap.TryGetValue(nodeId, out var nextNode)) {
+                throw new KeyNotFoundException($"Not found nodeId:{nodeId}");
             }
 
             // 遷移する必要がなければ無視
@@ -346,7 +356,7 @@ namespace UnityNavigationSystem {
 
             // 遷移先の共通親を探す
             var baseParent = default(INavNode);
-            if (option == null || !option.Refresh) {
+            if (!option.Refresh) {
                 baseParent = prevNode;
                 while (baseParent != null) {
                     var p = nextNode;
@@ -514,9 +524,9 @@ namespace UnityNavigationSystem {
         /// 特定Nodeの階層の中で特定の型のNodeを取得
         /// ※指定Nodeもチェック対象
         /// </summary>
-        public T GetNodeInParent<T>(Type targetNodeType)
+        public T GetNodeInParent<T>(int targetNodeId)
             where T : INavNode {
-            if (!_nodeMap.TryGetValue(targetNodeType, out var node)) {
+            if (!_nodeMap.TryGetValue(targetNodeId, out var node)) {
                 return default;
             }
             
@@ -533,21 +543,54 @@ namespace UnityNavigationSystem {
         }
 
         /// <summary>
+        /// 子要素の含まれている該当Node型のNodeIdを検索
+        /// </summary>
+        public bool TryGetChildNodeId<TNode>(out int nodeId)
+            where TNode : INavNode {
+            bool TryGet(Type foundType, INavNode node, out int id) {
+                id = 0;
+                
+                if (node == null) {
+                    return false;
+                }
+                
+                for (var i = 0; i < node.Children.Count; i++) {
+                    var child = node.Children[i];
+                    if (foundType.IsAssignableFrom(child.GetType())) {
+                        id = child.NodeId;
+                        return true;
+                    }
+                    
+                    if (TryGet(foundType, child, out id)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            
+            return TryGet(typeof(TNode), Current, out nodeId);
+        }
+
+        /// <summary>
         /// NavNodeのプリロード
         /// </summary>
-        public AsyncOperationHandle PreLoad(Type nodeType) {
+        public AsyncOperationHandle PreLoad(int nodeId) {
             if (IsTransitioning) {
                 throw new Exception("In transitioning");
             }
 
-            if (!_nodeMap.TryGetValue(nodeType, out var node)) {
+            if (!_nodeMap.TryGetValue(nodeId, out var node)) {
                 return AsyncOperationHandle.CanceledHandle;
             }
 
             // PreLoad情報を確認
-            if (!_preLoadInfos.TryGetValue(nodeType, out var preLoadInfo)) {
-                preLoadInfo = new PreLoadInfo { Node = node, State = PreLoadState.None, AsyncOperator = new AsyncOperator() };
-                _preLoadInfos.Add(nodeType, preLoadInfo);
+            if (!_preLoadInfos.TryGetValue(node, out var preLoadInfo)) {
+                preLoadInfo = new PreLoadInfo { Node = node, State = PreLoadState.None, AsyncOperator = new AsyncOperator(), ReferenceCount = 1 };
+                _preLoadInfos.Add(node, preLoadInfo);
+            }
+            else {
+                preLoadInfo.ReferenceCount++;
             }
 
             // PreLoad実行済み
@@ -566,17 +609,27 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// NavNodeのプリロード状態解除
         /// </summary>
-        public void UnPreLoad(Type nodeType) {
+        public void UnPreLoad(int nodeId) {
             if (IsTransitioning) {
                 throw new Exception("In transitioning");
             }
 
-            if (!_nodeMap.TryGetValue(nodeType, out _)) {
+            if (!_nodeMap.TryGetValue(nodeId, out var node)) {
                 return;
             }
 
-            // PreLoad情報から取り出し
-            if (!_preLoadInfos.Remove(nodeType, out var preLoadInfo)) {
+            if (!_preLoadInfos.TryGetValue(node, out var preLoadInfo)) {
+                return;
+            }
+
+            // 参照カウンタを下げる
+            preLoadInfo.ReferenceCount--;
+            if (preLoadInfo.ReferenceCount > 0) {
+                return;
+            }
+
+            // PreLoad情報から除外
+            if (!_preLoadInfos.Remove(node)) {
                 return;
             }
 

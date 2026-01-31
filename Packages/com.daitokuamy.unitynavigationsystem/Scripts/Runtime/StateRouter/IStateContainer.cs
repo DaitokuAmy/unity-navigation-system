@@ -24,13 +24,13 @@ namespace UnityNavigationSystem {
         /// <summary>
         /// 遷移処理
         /// </summary>
-        /// <param name="key">遷移ターゲットを決めるキー</param>
+        /// <param name="nodeId">遷移ターゲットを決めるキー</param>
         /// <param name="option">遷移時に渡すオプション</param>
         /// <param name="back">戻り遷移か</param>
         /// <param name="setupAction">遷移先初期化用関数</param>
         /// <param name="transition">遷移方法</param>
         /// <param name="effects">遷移時演出</param>
-        TransitionHandle<TState> TransitionTo(TKey key, TOption option, bool back, Action<TState> setupAction, ITransition transition, params ITransitionEffect[] effects);
+        TransitionHandle<TState> TransitionTo(TKey nodeId, TOption option, bool back, Action<TState> setupAction, ITransition transition, params ITransitionEffect[] effects);
         
         /// <summary>
         /// 状態リセット
